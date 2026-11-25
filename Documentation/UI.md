@@ -27,7 +27,7 @@ UI Toolkit only, no Canvas and no uGUI. The files are in `Assets/UI/UI Toolkit`:
 - Up and Down select (one step for each press), Submit chooses. It uses the old Input Manager like the main menu.
 - It appears and disappears at once (`pause` has no transition), with no title: the dim screen already says the game is paused.
 - **Pausing:** `Time.timeScale` 0 is not enough alone. The animation graph ignored it (cause in [ClipAnimator](Characters/ClipAnimator.md): fixed there). The player also kept reading the input: a held key started the move clip again and jump or spin fired. So the pause turns `Player` off (its `OnDisable` stops the input actions) and sets `AudioListener.pause`. The menu's own `AudioSource` sets `ignoreListenerPause` in code (the flag is not saved in the scene; without it the menu sounds were held back and all played together on resume). Anything new that reads input or plays sounds in `Update` must stop here too. Check: pause, then read the bones' rotations in two frames (equal), and listen to the menu sounds while paused.
-- A slot is framed with `FrameRow`, the selected one with `FrameSelection` (`Common.uss`), and shows only the saved name (or Empty).
+- A slot is the sliced `KeyEmpty` (the selected one `KeySelected`, `Common.uss`) and shows only the saved name (or Empty).
 - The slot list is the template `SaveSlots.uxml` placed in both documents (`Menu.uxml`, `Hud.uxml`) as an instance named `Slots`, so each document has one element with that name.
 - `screen`, `heading`, `item` and `item.selected` are in `Common.uss`, shared with the main menu.
 
