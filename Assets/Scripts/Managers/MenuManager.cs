@@ -15,6 +15,7 @@ public class MenuManager : MonoBehaviour
 
     [SerializeField] AudioClip selectionSound, submitSound, cancelSound, keyboardSound;
     [SerializeField] AudioSource audioSource;
+    [SerializeField] UIDocument document;
     readonly VisualElement[] screens = new VisualElement[5];
     readonly List<Label> [] items = new List<Label>[5];
     List<VisualElement> tipPages;
@@ -26,7 +27,7 @@ public class MenuManager : MonoBehaviour
 
     void Start()
     {
-        VisualElement root = GetComponent<UIDocument>().rootVisualElement;
+        VisualElement root = document.rootVisualElement;
         background = root.Q("Background");
         accountName = root.Q<Label>("AccountName");
         pageNumber = root.Q<Label>("PageNumber");
