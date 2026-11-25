@@ -5,29 +5,31 @@ using UnityEngine.UIElements;
 using static Utils;
 
 [RequireComponent(typeof(UIDocument))]
-public class MainMenu : MonoBehaviour
+public class MenuManager : MonoBehaviour
 {
     enum MenuScreen { Main, Account, Difficulty, Tips, Loading }
-    const string HiddenClass = "hidden", SelectedClass = "selected", DimClass = "dim";
-    const float SelectionDelay = 0.2f;
+    const string HiddenClass = "hidden", HiddenPageClass = "page-hidden", SelectedClass = "selected", DimClass = "dim";
+    const float SubmitDelay = 0.2f, FirstRepeatDelay = 0.4f, RepeatDelay = 0.12f;
     const int KeyColumns = 7, DeleteKeyIndex = 26, SaveKeyIndex = 27, NewGameIndex = 0, LoadSavedIndex = 1, TipsIndex = 2, ExitIndex = 3;
     static readonly string[] Difficulties = { "Easy", "Medium", "Hard" };
 
     [SerializeField] AudioClip selectionSound, submitSound, cancelSound, keyboardSound;
     [SerializeField] AudioSource audioSource;
     readonly VisualElement[] screens = new VisualElement[5];
-    readonly List<Label>[] items = new List<Label>[5];
+    readonly List<Label> [] items = new List<Label>[5];
+    List<VisualElement> tipPages;
     VisualElement background, loadingFill;
-    Label accountName, loadingText;
+    Label accountName, loadingText, pageNumber;
     MenuScreen current;
-    int selected, lastLoadingPercent = -1;
-    float selectionDelay;
+    int selected, tipPage, heldStep, lastLoadingPercent = -1;
+    float submitDelay, repeatTimer;
 
     void Start()
     {
         VisualElement root = GetComponent<UIDocument>().rootVisualElement;
         background = root.Q("Background");
         accountName = root.Q<Label>("AccountName");
+        pageNumber = root.Q<Label>("PageNumber");
         loadingText = root.Q<Label>("LoadingText");
         loadingFill = root.Q("LoadingFill");
         screens[(int)MenuScreen.Main] = root.Q("Main");
@@ -40,37 +42,75 @@ public class MainMenu : MonoBehaviour
         items[(int)MenuScreen.Difficulty] = screens[(int)MenuScreen.Difficulty].Query<Label>(className: "item").ToList();
         items[(int)MenuScreen.Tips] = new List<Label>();
         items[(int)MenuScreen.Loading] = new List<Label>();
+        tipPages = screens[(int)MenuScreen.Tips].Query(className: "tip-page").ToList();
         items[(int)MenuScreen.Main][0].AddToClassList(SelectedClass);
     }
 
     void Update()
     {
-        selectionDelay = Mathf.Max(0, selectionDelay - Time.deltaTime);
+        submitDelay = Mathf.Max(0, submitDelay - Time.deltaTime);
         if (current == MenuScreen.Loading) return;
         if (Input.GetButtonDown("Cancel") && current != MenuScreen.Main) { GoBackToMain(); return; }
-        Navigate();
+        MoveByHeldKey();
         bool submitted = current == MenuScreen.Account ? Input.GetButton("Submit") : Input.GetButtonDown("Submit");
-        if (submitted && selectionDelay == 0) Submit();
+        if (submitted && submitDelay == 0) Submit();
     }
 
-    void Navigate()
+    void MoveByHeldKey()
     {
-        List<Label> list = items[(int)current];
-        if (selectionDelay > 0 || list.Count == 0) return;
-        int columns = current == MenuScreen.Account ? KeyColumns : 1;
-        float horizontal = Input.GetAxis("Horizontal"), vertical = Input.GetAxis("Vertical");
-        int step = columns > 1 && horizontal != 0 ? (horizontal > 0 ? 1 : -1) : vertical != 0 ? (vertical > 0 ? -columns : columns) : 0;
-        if (step == 0) return;
-        selectionDelay = SelectionDelay;
-        list[selected].RemoveFromClassList(SelectedClass);
-        selected = (selected + step + list.Count) % list.Count;
-        list[selected].AddToClassList(SelectedClass);
+        int step = ReadStep();
+        if (step == 0) { heldStep = 0; return; }
+        if (step == heldStep)
+        {
+            repeatTimer -= Time.deltaTime;
+            if (repeatTimer > 0) return;
+            repeatTimer = RepeatDelay;
+        }
+        else
+        {
+            heldStep = step;
+            repeatTimer = FirstRepeatDelay;
+        }
+        Move(step);
+    }
+
+    int ReadStep()
+    {
+        float horizontal = Input.GetAxisRaw("Horizontal"), vertical = Input.GetAxisRaw("Vertical");
+        int horizontalStep = horizontal > 0 ? 1 : horizontal < 0 ? -1 : 0, verticalStep = vertical > 0 ? -1 : vertical < 0 ? 1 : 0;
+        switch (current)
+        {
+            case MenuScreen.Main: case MenuScreen.Difficulty: return verticalStep;
+            case MenuScreen.Account: return horizontalStep != 0 ? horizontalStep : verticalStep * KeyColumns;
+            case MenuScreen.Tips: return horizontalStep;
+            case MenuScreen.Loading: return 0;
+            default: throw new NotImplementedException(current.ToString());
+        }
+    }
+
+    void Move(int step)
+    {
+        if (current == MenuScreen.Tips) ShowTipPage((tipPage + step + tipPages.Count) % tipPages.Count);
+        else
+        {
+            List<Label> list = items[(int)current];
+            list[selected].RemoveFromClassList(SelectedClass);
+            selected = (selected + step + list.Count) % list.Count;
+            list[selected].AddToClassList(SelectedClass);
+        }
         audioSource.PlayOneShot(selectionSound);
+    }
+
+    void ShowTipPage(int page)
+    {
+        tipPage = page;
+        for (int i = 0; i < tipPages.Count; i++) tipPages[i].EnableInClassList(HiddenPageClass, i != page);
+        pageNumber.text = $"{page + 1} / {tipPages.Count}";
     }
 
     void Submit()
     {
-        selectionDelay = SelectionDelay;
+        submitDelay = SubmitDelay;
         switch (current)
         {
             case MenuScreen.Main: SubmitMainItem(); break;
@@ -138,7 +178,9 @@ public class MainMenu : MonoBehaviour
         foreach (Label item in items[(int)current]) item.RemoveFromClassList(SelectedClass);
         current = next;
         selected = 0;
-        selectionDelay = SelectionDelay;
+        submitDelay = SubmitDelay;
+        heldStep = 0;
+        if (next == MenuScreen.Tips) ShowTipPage(0);
         if (items[(int)next].Count > 0) items[(int)next][0].AddToClassList(SelectedClass);
     }
 

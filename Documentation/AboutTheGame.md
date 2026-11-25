@@ -6,7 +6,7 @@
 - Windows PC, played with keyboard or gamepad (both always work). Offline, no networking, store or money system, and never will. The game is shared as a build on itch.io; this repository holds the scripts, settings and docs only (`.gitignore`).
 
 ## What exists now
-- Two scenes: `Menu` (account name typed with an on-screen keyboard, difficulty, tips) and `Level1` (the playable level). Details: [MainMenu](Managers/MainMenu.md), [SceneManager](Managers/SceneManager.md).
+- Two scenes: `Menu` (account name typed with an on-screen keyboard, difficulty, tips) and `Level1` (the playable level). Details: [MenuManager](Managers/MenuManager.md), [SceneManager](Managers/SceneManager.md).
 - The player, with spin, shuriken and sprint: [Player](Characters/Player.md). Four skeleton types that patrol, chase and respawn, and static skeleton decorations: [Enemy](Characters/Enemy.md).
 - Animation without Animator Controllers: [ClipAnimator](Characters/ClipAnimator.md).
 - Saving is only partly built and does not work yet: [Saving](Saving.md).

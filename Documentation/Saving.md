@@ -20,7 +20,7 @@ How progress is saved. **This is the weakest part of the game now: most of it is
 
 **Code:**
 - `Assets/Scripts/Managers/SceneManager.cs`
-- `Assets/Scripts/Managers/MainMenu.cs`
+- `Assets/Scripts/Managers/MenuManager.cs`
 - `Assets/Scripts/Gameplay/Player/Player.cs`
 
 ## Decided for the new system

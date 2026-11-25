@@ -37,7 +37,7 @@ Not done yet. The aim is a small, really good, playable game ([AboutTheGame](Abo
 - [ ] Sounds: normal references or a small sound table instead of an Addressables load on every play ([SceneManager](Managers/SceneManager.md)).
 - [ ] Rename `AggroTrigger .cs` (a space in the file name) and the `SavedPositon` key.
 - [ ] Player and enemy numbers (health, energy, cooldowns, speeds) into data or constants ([Player](Characters/Player.md)).
-- [ ] `MainMenu`: screens as an enum and one reusable selectable list instead of repeated code ([MainMenu](Managers/MainMenu.md)).
+- [ ] `MenuManager` is built (screens as an enum, one selectable list) ([MenuManager](Managers/MenuManager.md)).
 - [ ] Non-allocating camera cast and cached trigger components ([Optimizations](Optimizations.md)).
 - [ ] The door has an open clip and the player has a `hasKey` flag, but nothing connects them: use them or delete them.
 - [ ] Go through the packs one by one and delete, replace or keep them (the owner decides each) ([ThirdPartyAssets](ThirdPartyAssets.md)).
