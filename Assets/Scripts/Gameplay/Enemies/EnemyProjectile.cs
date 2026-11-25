@@ -4,8 +4,8 @@ using static GameConstants;
 /// <summary>Pooled by Enemy to shot specific projectile to the Player.</summary>
 public class EnemyProjectile : MonoBehaviour
 {
-    public static GameManager GM; // Initialized by GameManager
-    public static Player Player; // Initialized by GameManager
+    public static SceneManager SM;
+    public static Player Player;
     [SerializeField] GameObject[] projectileTypeToActivate;
     int projectileType;
     float lifespan;

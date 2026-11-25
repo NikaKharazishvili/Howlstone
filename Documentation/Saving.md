@@ -4,11 +4,11 @@ How progress is saved. **This is the weakest part of the game now: most of it is
 
 ## What exists
 - Everything uses `PlayerPrefs`, keyed by the account name typed in the menu: `Account` holds the current name, `<account>_Difficulty` the chosen difficulty.
-- `GameManager.LoadData` (runs in `Awake`) reads, with the key prefix `<account>_<scene>_`: taken coin count, kills, breaks, and one key per coin name that was taken, and switches taken coins off.
+- `SceneManager.LoadData` (runs in `Awake`) reads, with the key prefix `<account>_<scene>_`: taken coin count, kills, breaks, and one key per coin name that was taken, and switches taken coins off.
 - `Player.LoadPlayerStats` moves the player to the saved position when the key `SavedPositon` is 1.
 
 ## What is not connected
-- Nothing calls `Player.SavePlayerData`, and the call in `GameManager` that would save coins (`SaveData`) is commented out. So nothing is ever written except the account and difficulty.
+- Nothing calls `Player.SavePlayerData`, and the call in `SceneManager` that would save coins (`SaveData`) is commented out. So nothing is ever written except the account and difficulty.
 - The saved health is never read, XP and level are never saved, kills and breaks are never written, and the difficulty is never read.
 - The main menu's Load entry does nothing, and a second account cannot be chosen.
 - The key `SavedPositon` is spelled wrong (it is only used in two places).
@@ -19,7 +19,7 @@ How progress is saved. **This is the weakest part of the game now: most of it is
 - One class owns the data and the reading and writing; other scripts ask it.
 
 **Code:**
-- `Assets/Scripts/Managers/GameManager.cs`
+- `Assets/Scripts/Managers/SceneManager.cs`
 - `Assets/Scripts/Managers/MainMenu.cs`
 - `Assets/Scripts/Gameplay/Player/Player.cs`
 

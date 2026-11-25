@@ -6,7 +6,7 @@ Before testing an idea, read "Not used" and "Tried and removed". A number belong
 - Sprite atlas: the HUD sprites are packed in one atlas (`HudAtlas`), compressed once at high quality.
 - Texture compression and mipmaps on 3D textures; Read/Write off on textures, models and meshes ([ProjectStructure](ProjectStructure.md)).
 - Mono for world-positioned sounds, streaming for music.
-- Pooling: shuriken projectiles, enemy projectiles and XP texts are pooled (arrays in the `GameManager`).
+- Pooling: shuriken projectiles, enemy projectiles and XP texts are pooled (arrays in the `SceneManager`).
 - Distance switch: enemies and coins far from the player have their components turned off ([Proximity](Proximity.md)).
 - Allocation-free timers: `Wait` with the owner passed in ([Utils](Helpers/Utils.md)).
 - Animator culling `CullUpdateTransforms` on characters: off-screen characters stop moving bones.

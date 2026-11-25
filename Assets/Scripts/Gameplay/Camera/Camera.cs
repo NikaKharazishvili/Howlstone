@@ -4,7 +4,7 @@ using static GameConstants;
 
 public class Cam : MonoBehaviour
 {
-    public static Player Player; // Initialized by GameManager
+    public static Player Player;
 
     // Occlusion things
     [SerializeField] LayerMask occludableLayer;

@@ -1,8 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI;
 using System.Collections;
-using UnityEngine.SceneManagement;
-using TMPro;
 
 public static class Utils
 {
@@ -38,19 +35,16 @@ public static class Utils
         return grounded;
     }
 
-    public static IEnumerator LoadSceneAsync(string sceneName, Image loadingBar = null, TextMeshProUGUI loadingText = null, float briefDelay = 0)
+    public static IEnumerator LoadSceneAsync(string sceneName, System.Action<float> showProgress, float briefDelay = 0)
     {
-        AsyncOperation operation = SceneManager.LoadSceneAsync(sceneName);
+        AsyncOperation operation = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneName);
         operation.allowSceneActivation = false;
         while (operation.progress < 0.9f)
         {
-            float progress = operation.progress / 0.9f;
-            if (loadingText) loadingText.text = $"Loading {Mathf.RoundToInt(progress * 100)}%";
-            if (loadingBar) loadingBar.fillAmount = progress;
+            showProgress(operation.progress / 0.9f);
             yield return null;
         }
-        if (loadingText) loadingText.text = "Loading 100%";
-        if (loadingBar) loadingBar.fillAmount = 1;
+        showProgress(1);
         yield return new WaitForSeconds(briefDelay);
         operation.allowSceneActivation = true;
     }

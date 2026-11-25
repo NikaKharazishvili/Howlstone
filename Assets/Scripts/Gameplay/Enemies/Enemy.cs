@@ -6,8 +6,8 @@ using static GameConstants;
 [SelectionBase]
 public class Enemy : MonoBehaviour
 {
-    public static GameManager GM; // Initialized by GameManager
-    public static Player Player; // Initialized by GameManager
+    public static SceneManager SM;
+    public static Player Player;
     [SerializeField] EnemyType enemyType;
     [SerializeField] EnemyProjectileType enemyProjectileType;
     [SerializeField] Vector2 xp = new Vector2();
@@ -148,14 +148,14 @@ public class Enemy : MonoBehaviour
         deathFadeTime = 0;
         agent.ResetPath();
         clipAnimator.Play(diedByPlayer ? death1Clip : death2Clip);
-        if (diedByPlayer) GM.PlaySound(audioSource, SoundType.PlayerHitEnemy1, SoundType.PlayerHitEnemy2, SoundType.PlayerHitEnemy3, SoundType.PlayerHitEnemy4, SoundType.PlayerHitEnemy5, SoundType.PlayerHitEnemy6);
-        else GM.PlaySound(audioSource, SoundType.ShurikenHitEnemy);
-        this.Wait(0.25f, e => GM.PlaySound(e.audioSource, SoundType.SkeletonDeath1, SoundType.SkeletonDeath2, SoundType.SkeletonDeath3, SoundType.SkeletonDeath4, SoundType.SkeletonDeath5));
+        if (diedByPlayer) SM.PlaySound(audioSource, SoundType.PlayerHitEnemy1, SoundType.PlayerHitEnemy2, SoundType.PlayerHitEnemy3, SoundType.PlayerHitEnemy4, SoundType.PlayerHitEnemy5, SoundType.PlayerHitEnemy6);
+        else SM.PlaySound(audioSource, SoundType.ShurikenHitEnemy);
+        this.Wait(0.25f, e => SM.PlaySound(e.audioSource, SoundType.SkeletonDeath1, SoundType.SkeletonDeath2, SoundType.SkeletonDeath3, SoundType.SkeletonDeath4, SoundType.SkeletonDeath5));
 
-        if (!isKillenOnce) { isKillenOnce = true; GM.AddKill(); }
+        if (!isKillenOnce) { isKillenOnce = true; SM.AddKill(); }
 
         int randomXp = Random.Range((int)xp.x, (int)xp.y + 1);
-        PoolComponent(GM.XpTexts)?.ShowXPText(transform, randomXp);
+        PoolComponent(SM.XpTexts)?.ShowXPText(transform, randomXp);
         Player.GainXP(randomXp);
 
         this.Wait(EnemyDeathDeactivateDelay, e => e.gameObject.SetActive(false));
@@ -180,11 +180,11 @@ public class Enemy : MonoBehaviour
         }
         else
         {
-            PoolComponent(GM.EnemyProjectiles).Shoot(transform, enemyProjectileType);
-            GM.PlaySound(audioSource, enemyProjectileType == EnemyProjectileType.Spell ? SoundType.SpellShoot : SoundType.ArrowShoot);
+            PoolComponent(SM.EnemyProjectiles).Shoot(transform, enemyProjectileType);
+            SM.PlaySound(audioSource, enemyProjectileType == EnemyProjectileType.Spell ? SoundType.SpellShoot : SoundType.ArrowShoot);
         }
     }
 
     // Triggered by moving animation
-    void PlayRandomFootstepSound() => GM.PlaySound(audioSource, SoundType.Footsteps1, SoundType.Footsteps2, SoundType.Footsteps3, SoundType.Footsteps4, SoundType.Footsteps5, SoundType.Footsteps6);
+    void PlayRandomFootstepSound() => SM.PlaySound(audioSource, SoundType.Footsteps1, SoundType.Footsteps2, SoundType.Footsteps3, SoundType.Footsteps4, SoundType.Footsteps5, SoundType.Footsteps6);
 }

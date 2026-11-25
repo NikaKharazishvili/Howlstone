@@ -7,7 +7,7 @@ The player (the free ninja for now, a humanoid wolf later). One `Player` class s
 - The player reads input in `Update`; Jump and ToggleHud are events.
 
 ## Movement
-- Moves relative to the camera (`GameManager.Camera`), turns toward its movement, and keeps its own vertical speed (a `Rigidbody`).
+- Moves relative to the camera (`SceneManager.Camera`), turns toward its movement, and keeps its own vertical speed (a `Rigidbody`).
 - Grounded check: `Utils.IsGrounded` (rays from the capsule's feet). Water (`TagWater` trigger) slows the player; a `TagMovingPlatform` makes the player a child of the platform while touching it.
 - Sprint costs energy over time and fills it back when not sprinting. After the energy runs out sprint is off until it is full again (`canSprint`).
 

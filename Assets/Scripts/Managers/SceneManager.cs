@@ -1,45 +1,31 @@
-using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.AddressableAssets;
 using static GameConstants;
 
-/// <summary>Game Manager, which also acts like Global Referencer.</summary>
-[DefaultExecutionOrder(-100)] // Ensures GameManager's awake initialization runs first
-public class GameManager : MonoBehaviour
+[DefaultExecutionOrder(-100)]
+public class SceneManager : MonoBehaviour
 {
-    public static GameManager Instance;
+    public static SceneManager Instance;
 
-    // [Header("")]
     [field: SerializeField] public string AccountAndSceneName { get; private set; }
     [field: SerializeField] public Player Player { get; private set; }
     [field: SerializeField] public Transform Camera { get; private set; }
+    [field: SerializeField] public Hud Hud { get; private set; }
     [field: SerializeField] public ShurikenProjectile[] ShurikenProjectiles { get; private set; }
     [field: SerializeField] public Mesh[] ShurikenModels { get; private set; }
     [field: SerializeField] public EnemyProjectile[] EnemyProjectiles { get; private set; }
     [field: SerializeField] public XPText[] XpTexts { get; private set; }
 
-    // [Header("UI")]
-    [SerializeField] TextMeshProUGUI progressText, eventText, questText;
-
-    // Coins, Kills, Breaks
-    [SerializeField] TextMeshProUGUI coinsText, killsText, breaksText; // Hud texts
-    [SerializeField] GameObject coinsParent, enemiesParent, breakablesParent; // For calculating child count and also foreaching
+    [SerializeField] GameObject coinsParent, enemiesParent, breakablesParent;
     int currentCoins, maxCoins, currentKills, maxKills, currentBreaks, maxBreaks;
-
-    // For toggling hud on/off
-    [SerializeField] ClipAnimator hudAnimator;
-    [SerializeField] AnimationClip hudOnAnimation, hudOffAnimation;
     bool isHudOn = true, canToggleHud = true;
 
-    // [Button]
     void DeleteAllPlayerPrefs()
     {
         PlayerPrefs.DeleteAll();
-        foreach (Transform coin in coinsParent.transform) coin.gameObject.SetActive(true); // Activate so they won't be saved OnApplicationQuit
+        foreach (Transform coin in coinsParent.transform) coin.gameObject.SetActive(true);
     }
 
-    // [Button]
     void SetUpScene()
     {
         Camera = UnityEngine.Camera.main.transform;
@@ -49,68 +35,58 @@ public class GameManager : MonoBehaviour
         EnemyProjectiles = FindObjectsByType<EnemyProjectile>(FindObjectsInactive.Include, FindObjectsSortMode.None);
     }
 
-    // void OnApplicationQuit() => SaveData();
-
     void Awake()
     {
         Instance = this;
-        Player.GM = this;
+        Player.SM = this;
         Cam.Player = Player;
-        ShurikenProjectile.GM = this;
-        Enemy.GM = this;
+        ShurikenProjectile.SM = this;
+        Enemy.SM = this;
         Enemy.Player = Player;
-        EnemyProjectile.GM = this;
+        EnemyProjectile.SM = this;
         EnemyProjectile.Player = Player;
-        Hazard.GM = this;
+        Hazard.SM = this;
         XPText.Cam = Camera;
+        Hud.gameObject.SetActive(true);
+        Hud.Bind();
         LoadData();
     }
 
-    // Objects call this method to load and play audio clips from addersables
     public void PlaySound(AudioSource audioSource, params SoundType[] variants) => Addressables.LoadAssetAsync<AudioClip>(variants[Random.Range(0, variants.Length)].ToString()).Completed += h => audioSource.PlayOneShot(h.Result);
 
-    // Toggles hud on/off. Called by Player on hotkey
     public void ToggleHud()
     {
         if (!canToggleHud) return;
         isHudOn = !isHudOn;
-        hudAnimator.PlayInstant(isHudOn ? hudOnAnimation : hudOffAnimation);
+        Hud.SetShown(isHudOn);
         canToggleHud = false;
-        this.Wait(ToggleHudCD, g => g.canToggleHud = true);
+        this.Wait(ToggleHudCD, s => s.canToggleHud = true);
     }
 
-    // Update coins' hud and playerprefs, deactivate coin
     public void AddCoin(GameObject coin)
     {
         currentCoins++;
-        coinsText.text = $"{currentCoins:00}/{maxCoins:00}";
+        Hud.SetCoins(currentCoins, maxCoins);
         coin.SetActive(false);
     }
 
     public void AddKill()
     {
         currentKills++;
-        killsText.text = $"{currentKills:00}/{maxKills:00}";
+        Hud.SetKills(currentKills, maxKills);
     }
 
     public void AddBreak()
     {
-        currentBreaks += 1;
-        breaksText.text = $"{currentBreaks:00}/{maxBreaks:00}";
+        currentBreaks++;
+        Hud.SetBreaks(currentBreaks, maxBreaks);
     }
 
-    void UpdateLevelProgressText() => progressText.text = $"Level Progress: {0}%";
-
-    public void EventText(int Event)
-    {
-        eventText.text = Event == 1 ? "You are dead" : Event == 2 ? "Level Up!" : Event == 3 ? "You won!" : null;
-        eventText.color = Event == 1 ? Color.red : Event == 2 ? Color.green : Event == 3 ? Color.green : Color.white;
-        this.Wait(3, g => g.eventText.text = null);
-    }
+    public void EventText(int Event) => Hud.ShowEvent(Event == 1 ? "You are dead" : Event == 2 ? "Level Up!" : Event == 3 ? "You won!" : null, Event == 1 ? Color.red : Color.green);
 
     void LoadData()
     {
-        AccountAndSceneName = $"{PlayerPrefs.GetString("Account")}_{SceneManager.GetActiveScene().name}_";
+        AccountAndSceneName = $"{PlayerPrefs.GetString("Account")}_{UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}_";
         currentCoins = PlayerPrefs.GetInt(AccountAndSceneName + "TakenCoinsCount", 0);
         currentKills = PlayerPrefs.GetInt(AccountAndSceneName + "Kills", 0);
         currentBreaks = PlayerPrefs.GetInt(AccountAndSceneName + "Breaks", 0);
@@ -119,17 +95,15 @@ public class GameManager : MonoBehaviour
         maxKills = enemiesParent.transform.childCount;
         maxBreaks = breakablesParent.transform.childCount;
 
-        coinsText.text = $"{currentCoins:00}/{maxCoins:00}";
-        killsText.text = $"{currentKills:00}/{maxKills:00}";
-        breaksText.text = $"{currentBreaks:00}/{maxBreaks:00}";
+        Hud.SetCoins(currentCoins, maxCoins);
+        Hud.SetKills(currentKills, maxKills);
+        Hud.SetBreaks(currentBreaks, maxBreaks);
 
-        // Deactivate already taken coins on game start
         foreach (Transform coin in coinsParent.transform) coin.gameObject.SetActive(PlayerPrefs.GetInt(AccountAndSceneName + coin.name, 0) == 0);
     }
 
     void SaveData()
     {
-        // Save taken coins to counting and disabling them
         int takenCoinsCount = 0;
         foreach (Transform coin in coinsParent.transform)
             if (!coin.gameObject.activeSelf)

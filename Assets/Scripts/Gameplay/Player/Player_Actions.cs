@@ -27,7 +27,7 @@ public partial class Player : MonoBehaviour
         moveInput = inputActions.Player.Move.ReadValue<Vector2>();
         rotateCameraInput = inputActions.Player.RotateCamera.ReadValue<float>();
 
-        Vector3 horizontalDirection = (GM.Camera.forward * moveInput.y + GM.Camera.right * moveInput.x).normalized;
+        Vector3 horizontalDirection = (SM.Camera.forward * moveInput.y + SM.Camera.right * moveInput.x).normalized;
         Vector3 velocity = horizontalDirection * currentSpeed;
         velocity.y = rb.linearVelocity.y;
         rb.linearVelocity = velocity;
@@ -43,8 +43,7 @@ public partial class Player : MonoBehaviour
         canSprint = currentEnergy >= maxEnergy || (canSprint && currentEnergy > 0);
         if (previousEnergy != currentEnergy)
         {
-            energyFill.fillAmount = currentEnergy / maxEnergy;
-            energyFill.color = canSprint ? Color.white : Color.grey;
+            SM.Hud.SetEnergy(currentEnergy / maxEnergy, canSprint);
         }
     }
 
@@ -56,19 +55,22 @@ public partial class Player : MonoBehaviour
         spinCD = 0;
         isSpinning = true;
         if (Chance(50)) clipAnimator.Play(spin1Clip); else clipAnimator.Play(spin2Clip, Spin2Speed);
-        GM.PlaySound(audioSource, SoundType.PlayerSpin);
+        SM.PlaySound(audioSource, SoundType.PlayerSpin);
         this.Wait(spinTime, p => p.isSpinning = false);
     }
 
     // Shoots Shuriken towards nearest enemy in range. Has cooldown
     void Shoot()
     {
+        float previousThrowCD = throwCD;
         throwCD = Mathf.Min(throwCD + Time.deltaTime, throwReady);
+        if (throwCD != previousThrowCD) SM.Hud.SetThrow(throwCD / throwReady);
         if (!inputActions.Player.Shoot.WasPressedThisFrame() || isSpinning || isThrowing || throwCD < throwReady) return;
         throwCD = 0;
+        SM.Hud.SetThrow(0);
         isThrowing = true;
         clipAnimator.Play(throwClip, ThrowSpeed);
-        GM.PlaySound(audioSource, SoundType.ShurikenShoot);
+        SM.PlaySound(audioSource, SoundType.ShurikenShoot);
         FindAndShootNearestEnemy();
         this.Wait(0.6f, p => p.isThrowing = false);
     }
@@ -77,8 +79,8 @@ public partial class Player : MonoBehaviour
     {
         if (!IsAlive || !isGrounded) return;
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, PlayerJumpStrength, rb.linearVelocity.z);
-        GM.PlaySound(audioSource, SoundType.PlayerJump);
+        SM.PlaySound(audioSource, SoundType.PlayerJump);
     }
 
-    void ToggleHud(UnityEngine.InputSystem.InputAction.CallbackContext _) => GM.ToggleHud();
+    void ToggleHud(UnityEngine.InputSystem.InputAction.CallbackContext _) => SM.ToggleHud();
 }

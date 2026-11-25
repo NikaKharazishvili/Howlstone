@@ -3,7 +3,7 @@ using static GameConstants;
 
 public class ShurikenProjectile : MonoBehaviour
 {
-    public static GameManager GM; // Initialized by GameManager
+    public static SceneManager SM;
     [SerializeField] GameObject[] shurikenTypeToActivate;
     [SerializeField] AudioSource audioSource;
     Transform target;
@@ -18,7 +18,7 @@ public class ShurikenProjectile : MonoBehaviour
     {
         lifeSpan = ShurikenLifeSpan;
         alreadyHit = false;
-        int random = Random.Range(0, GM.ShurikenModels.Length);
+        int random = Random.Range(0, SM.ShurikenModels.Length);
         for (int i = 0; i < shurikenTypeToActivate.Length; i++) shurikenTypeToActivate[i].SetActive(i == random);
         canRotate = shurikenTypeToActivate[random].name != "Kunai";
 
@@ -67,7 +67,7 @@ public class ShurikenProjectile : MonoBehaviour
         else if (other.gameObject.CompareTag(TagUntagged) || other.gameObject.CompareTag(TagTerrain))
         {
             alreadyHit = true;
-            GM.PlaySound(audioSource, SoundType.ShurikenHitWall);
+            SM.PlaySound(audioSource, SoundType.ShurikenHitWall);
             movementDirection = Vector3.zero;
             canRotate = false;
         }

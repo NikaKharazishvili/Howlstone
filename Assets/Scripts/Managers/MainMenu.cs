@@ -1,188 +1,154 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+using UnityEngine.UIElements;
 using static Utils;
 
+[RequireComponent(typeof(UIDocument))]
 public class MainMenu : MonoBehaviour
 {
-    [SerializeField] int menu = 1, selected = 1;
-    [SerializeField] GameObject mainMenu, newGameMenu, difficultyMenu, tipsMenu;
-    [SerializeField] Image background;
-    [SerializeField] TextMeshProUGUI creatingAccountName;
-    [SerializeField] TextMeshProUGUI[] menus, difficulties, letters;
-    [SerializeField] ClipAnimator mainMenuAnim, newGameMenuAnim, tipsMenuAnim;
-    [SerializeField] AnimationClip menuUpClip, menuUp2Clip, menuDownClip, menuDown2Clip, menuLeftClip, menuRightClip;
+    enum MenuScreen { Main, Account, Difficulty, Tips, Loading }
+    const string HiddenClass = "hidden", SelectedClass = "selected", DimClass = "dim";
+    const float SelectionDelay = 0.2f;
+    const int KeyColumns = 7, DeleteKeyIndex = 26, SaveKeyIndex = 27, NewGameIndex = 0, LoadSavedIndex = 1, TipsIndex = 2, ExitIndex = 3;
+    static readonly string[] Difficulties = { "Easy", "Medium", "Hard" };
+
     [SerializeField] AudioClip selectionSound, submitSound, cancelSound, keyboardSound;
     [SerializeField] AudioSource audioSource;
-    float selectionDelay;  // For menu selection delay
+    readonly VisualElement[] screens = new VisualElement[5];
+    readonly List<Label>[] items = new List<Label>[5];
+    VisualElement background, loadingFill;
+    Label accountName, loadingText;
+    MenuScreen current;
+    int selected, lastLoadingPercent = -1;
+    float selectionDelay;
 
-    // Loading
-    [SerializeField] Image loadingBar;
-    [SerializeField] TextMeshProUGUI loadingText;
+    void Start()
+    {
+        VisualElement root = GetComponent<UIDocument>().rootVisualElement;
+        background = root.Q("Background");
+        accountName = root.Q<Label>("AccountName");
+        loadingText = root.Q<Label>("LoadingText");
+        loadingFill = root.Q("LoadingFill");
+        screens[(int)MenuScreen.Main] = root.Q("Main");
+        screens[(int)MenuScreen.Account] = root.Q("Account");
+        screens[(int)MenuScreen.Difficulty] = root.Q("Difficulty");
+        screens[(int)MenuScreen.Tips] = root.Q("Tips");
+        screens[(int)MenuScreen.Loading] = root.Q("Loading");
+        items[(int)MenuScreen.Main] = screens[(int)MenuScreen.Main].Query<Label>(className: "item").ToList();
+        items[(int)MenuScreen.Account] = screens[(int)MenuScreen.Account].Query<Label>(className: "key").ToList();
+        items[(int)MenuScreen.Difficulty] = screens[(int)MenuScreen.Difficulty].Query<Label>(className: "item").ToList();
+        items[(int)MenuScreen.Tips] = new List<Label>();
+        items[(int)MenuScreen.Loading] = new List<Label>();
+        items[(int)MenuScreen.Main][0].AddToClassList(SelectedClass);
+    }
 
-    void Update() => MenuKeys();
-
-    void MenuKeys()
+    void Update()
     {
         selectionDelay = Mathf.Max(0, selectionDelay - Time.deltaTime);
-        float verticalInput = Input.GetAxis("Vertical");
-        if (menu == 0)  // Main menu(menus' selection)
+        if (current == MenuScreen.Loading) return;
+        if (Input.GetButtonDown("Cancel") && current != MenuScreen.Main) { GoBackToMain(); return; }
+        Navigate();
+        bool submitted = current == MenuScreen.Account ? Input.GetButton("Submit") : Input.GetButtonDown("Submit");
+        if (submitted && selectionDelay == 0) Submit();
+    }
+
+    void Navigate()
+    {
+        List<Label> list = items[(int)current];
+        if (selectionDelay > 0 || list.Count == 0) return;
+        int columns = current == MenuScreen.Account ? KeyColumns : 1;
+        float horizontal = Input.GetAxis("Horizontal"), vertical = Input.GetAxis("Vertical");
+        int step = columns > 1 && horizontal != 0 ? (horizontal > 0 ? 1 : -1) : vertical != 0 ? (vertical > 0 ? -columns : columns) : 0;
+        if (step == 0) return;
+        selectionDelay = SelectionDelay;
+        list[selected].RemoveFromClassList(SelectedClass);
+        selected = (selected + step + list.Count) % list.Count;
+        list[selected].AddToClassList(SelectedClass);
+        audioSource.PlayOneShot(selectionSound);
+    }
+
+    void Submit()
+    {
+        selectionDelay = SelectionDelay;
+        switch (current)
         {
-            if (verticalInput != 0 && selectionDelay == 0)
-            {
-                selectionDelay = 0.2f;
-                ClearSelection("menus");
-
-                selected = verticalInput > 0
-                    ? (selected == 0 ? 3 : selected - 1)
-                    : (selected == 3 ? 0 : selected + 1);
-
-                SelectNext("menus");
-                audioSource.PlayOneShot(selectionSound);
-            }
-
-            if (Input.GetButtonDown("Submit"))  // Select from Main Menu
-            {
-                mainMenuAnim.PlayInstant(menuUpClip);
-                if (selected == 0)  // New Game(account creation)
-                {
-                    newGameMenuAnim.PlayInstant(menuUp2Clip);
-                    SelectNext("letters");
-                }
-                else if (selected == 1) { }  // Load
-                else if (selected == 2) tipsMenuAnim.PlayInstant(menuLeftClip);  // Tips
-                else if (selected == 3) Exit();  // Exit game
-
-                audioSource.PlayOneShot(submitSound);
-                ClearSelection("menus");  // Selected text(yellow and bigger) becomes nonselected(white and normal size)
-                menu = selected + 1;  // 1.Account Creation,   2.Load,   3.Tips,   4.Exit
-                selected = 0;
-                selectionDelay = 0.2f;
-                background.color = Color.grey;
-            }
+            case MenuScreen.Main: SubmitMainItem(); break;
+            case MenuScreen.Account: SubmitKey(); break;
+            case MenuScreen.Difficulty: StartGame(); break;
+            case MenuScreen.Tips: break;
+            case MenuScreen.Loading: break;
+            default: throw new NotImplementedException(current.ToString());
         }
-        //----------------------------------------------------------------------------------------
-        else if (menu == 1)  // New Game(Account Creation)
-        {
-            if (Input.GetAxis("Horizontal") > 0 && selectionDelay == 0)  // Move to the right by 1 letter
-            {
-                selectionDelay = 0.2f;
-                ClearSelection("letters");
-                selected += 1;
-                if (selected > letters.Length - 1) selected = 0;
-                SelectNext("letters");
-                audioSource.PlayOneShot(selectionSound);
-            }
-            else if (Input.GetAxis("Horizontal") < 0 && selectionDelay == 0)  // Move to the left by 1 letter
-            {
-                selectionDelay = 0.2f;
-                ClearSelection("letters");
-                selected -= 1;
-                if (selected < 0) selected = letters.Length - 1;
-                SelectNext("letters");
-                audioSource.PlayOneShot(selectionSound);
-            }
-            else if (Input.GetAxis("Vertical") < 0 && selectionDelay == 0)  // Move down by 1 lane
-            {
-                selectionDelay = 0.2f;
-                ClearSelection("letters");
-                selected += 7;
-                selected = selected == 28 ? 0 : selected == 29 ? 1 : selected == 30 ? 2 : selected == 31 ? 3 : selected == 32 ? 4 : selected == 33 ? 5 : selected == 34 ? 6 : selected;
-                SelectNext("letters");
-                audioSource.PlayOneShot(selectionSound);
-            }
-            else if (Input.GetAxis("Vertical") > 0 && selectionDelay == 0)  // Move up by 1 lane
-            {
-                selectionDelay = 0.2f;
-                ClearSelection("letters");
-                selected -= 7;
-                selected = selected == -7 ? 21 : selected == -6 ? 22 : selected == -5 ? 23 : selected == -4 ? 24 : selected == -3 ? 25 : selected == -2 ? 26 : selected == -1 ? 27 : selected;
-                SelectNext("letters");
-                audioSource.PlayOneShot(selectionSound);
-            }
+    }
 
-            if (Input.GetButton("Submit") && selected == 26 && selectionDelay == 0)  // Delete one letter
-            {
-                selectionDelay = 0.2f;
-                audioSource.PlayOneShot(cancelSound);
-                creatingAccountName.text = creatingAccountName.text.Length > 0 ? creatingAccountName.text.Substring(0, creatingAccountName.text.Length - 1) : "";
-            }
-            else if (Input.GetButton("Submit") && selected == 27 && selectionDelay == 0)  // Create and save account by the chosen letters
-            {
-                selectionDelay = 0.2f;
-                if (creatingAccountName.text.Length > 0)
-                {
-                    audioSource.PlayOneShot(submitSound);
-                    ClearSelection("letters");
-                    selected = 0;
-                    SelectNext("difficulties");
-                    menu = 11;
-                    newGameMenuAnim.PlayInstant(menuDown2Clip);
-                    this.Wait(0.2f, m => m.difficultyMenu.SetActive(true));
-                }
-                else audioSource.PlayOneShot(cancelSound);
-            }
-            else if (Input.GetButton("Submit") && selectionDelay == 0)  // Choose one letter
-            {
-                selectionDelay = 0.2f;
-                audioSource.PlayOneShot(keyboardSound);
-                creatingAccountName.text += letters[selected].text;
-            }
-        }
-        else if (menu == 11)  // Choosing difficulty for our account
+    void SubmitMainItem()
+    {
+        switch (selected)
         {
-            if (Input.GetAxis("Vertical") > 0 && selectionDelay == 0)
-            {
-                selectionDelay = 0.2f;
-                ClearSelection("difficulties");
-                selected = (selected - 1) < 0 ? 2 : selected - 1;
-                SelectNext("difficulties");
-                audioSource.PlayOneShot(selectionSound);
-            }
-            else if (Input.GetAxis("Vertical") < 0 && selectionDelay == 0)
-            {
-                selectionDelay = 0.2f;
-                ClearSelection("difficulties");
-                selected = (selected + 1) > 2 ? 0 : selected + 1;
-                SelectNext("difficulties");
-                audioSource.PlayOneShot(selectionSound);
-            }
-            else if (Input.GetButtonDown("Submit") && selectionDelay == 0)
-            {
-                selectionDelay = 0.2f;
-                string difficulty = selected == 0 ? "Easy" : selected == 1 ? "Medium" : "Hard";
-                PlayerPrefs.SetString("Account", creatingAccountName.text);
-                PlayerPrefs.SetString(PlayerPrefs.GetString("Account") + "_Difficulty", difficulty);
+            case NewGameIndex: audioSource.PlayOneShot(submitSound); ShowScreen(MenuScreen.Account); break;
+            case LoadSavedIndex: audioSource.PlayOneShot(cancelSound); break;
+            case TipsIndex: audioSource.PlayOneShot(submitSound); ShowScreen(MenuScreen.Tips); break;
+            case ExitIndex: Exit(); break;
+            default: throw new NotImplementedException(selected.ToString());
+        }
+    }
 
-                menu = 6; // Disable key of returning back to main menu because we are moving to new scene
-                difficultyMenu.SetActive(false);
-                audioSource.PlayOneShot(selectionSound);
-                loadingBar.transform.parent.gameObject.SetActive(true);
-                StartCoroutine(LoadSceneAsync("Level1", loadingBar, loadingText, 0.5f));
-            }
-        }
-        //----------------------------------------------------------------------------------------
-        if (menu != 0 && menu != 6 && Input.GetButtonDown("Cancel"))  // Return back to Main Menu
+    void SubmitKey()
+    {
+        if (selected == DeleteKeyIndex)
         {
-            if (menu == 1)
-            {
-                ClearSelection("letters");
-            }
-            else if (menu == 11)
-            {
-                ClearSelection("difficulties");
-            }
-            background.color = Color.white;
-            mainMenuAnim.PlayInstant(menuDownClip);
-            if (menu == 1) newGameMenuAnim.PlayInstant(menuDown2Clip);
-            if (menu == 3) tipsMenuAnim.PlayInstant(menuRightClip);
-            menu = 0;
-            selected = 0;
-            SelectNext("menus");
-            creatingAccountName.text = "";
-            difficultyMenu.SetActive(false);
             audioSource.PlayOneShot(cancelSound);
+            if (accountName.text.Length > 0) accountName.text = accountName.text[..^1];
         }
+        else if (selected == SaveKeyIndex)
+        {
+            if (accountName.text.Length == 0) { audioSource.PlayOneShot(cancelSound); return; }
+            audioSource.PlayOneShot(submitSound);
+            ShowScreen(MenuScreen.Difficulty);
+        }
+        else
+        {
+            audioSource.PlayOneShot(keyboardSound);
+            accountName.text += items[(int)MenuScreen.Account][selected].text;
+        }
+    }
+
+    void StartGame()
+    {
+        PlayerPrefs.SetString("Account", accountName.text);
+        PlayerPrefs.SetString(accountName.text + "_Difficulty", Difficulties[selected]);
+        audioSource.PlayOneShot(selectionSound);
+        ShowScreen(MenuScreen.Loading);
+        StartCoroutine(LoadSceneAsync("Level1", ShowLoadingProgress, 0.5f));
+    }
+
+    void GoBackToMain()
+    {
+        accountName.text = "";
+        audioSource.PlayOneShot(cancelSound);
+        ShowScreen(MenuScreen.Main);
+    }
+
+    void ShowScreen(MenuScreen next)
+    {
+        screens[(int)current].AddToClassList(HiddenClass);
+        screens[(int)next].RemoveFromClassList(HiddenClass);
+        background.EnableInClassList(DimClass, next != MenuScreen.Main);
+        foreach (Label item in items[(int)current]) item.RemoveFromClassList(SelectedClass);
+        current = next;
+        selected = 0;
+        selectionDelay = SelectionDelay;
+        if (items[(int)next].Count > 0) items[(int)next][0].AddToClassList(SelectedClass);
+    }
+
+    void ShowLoadingProgress(float progress)
+    {
+        int percent = Mathf.RoundToInt(progress * 100);
+        if (percent == lastLoadingPercent) return;
+        lastLoadingPercent = percent;
+        loadingText.text = $"Loading {percent}%";
+        loadingFill.style.width = Length.Percent(percent);
     }
 
     void Exit()
@@ -190,45 +156,7 @@ public class MainMenu : MonoBehaviour
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
-               Application.Quit();
+        Application.Quit();
 #endif
-    }
-
-    void ClearSelection(string str)
-    {
-        if (str == "menus")
-        {
-            menus[selected].color = Color.white;
-            menus[selected].transform.localScale = new Vector3(1f, 1f, 1f);
-        }
-        else if (str == "letters")
-        {
-            letters[selected].color = Color.white;
-            letters[selected].transform.localScale = new Vector3(1f, 1f, 1f);
-        }
-        else if (str == "difficulties")
-        {
-            difficulties[selected].color = Color.white;
-            difficulties[selected].transform.localScale = new Vector3(1f, 1f, 1f);
-        }
-    }
-
-    void SelectNext(string str)
-    {
-        if (str == "menus")
-        {
-            menus[selected].color = Color.yellow;
-            menus[selected].transform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
-        }
-        else if (str == "letters")
-        {
-            letters[selected].color = selected == 26 ? Color.red : selected == 27 ? Color.green : Color.yellow;
-            letters[selected].transform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
-        }
-        else if (str == "difficulties")
-        {
-            difficulties[selected].color = Color.yellow;
-            difficulties[selected].transform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
-        }
     }
 }

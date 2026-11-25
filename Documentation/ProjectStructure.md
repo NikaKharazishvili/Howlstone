@@ -7,7 +7,7 @@ The layout and naming rules of the project (the same style as the owner's other 
 - `Scenes/`: `Menu`, `Level1` and the `Level1` folder with the scene's own data.
 - `Scripts/`: `Core` (constants, helpers, `ClipAnimator`), `Gameplay` (`Player`, `Enemies`, `Camera`, `Proximity`), `Managers`, `UI`. A script class with a doc is listed in that doc under `Code:`.
 - `Objects/`: everything in the world (models, textures, materials, prefabs, animation clips) by kind, one `Animations` folder inside the kind that uses the clips (clips only, no controllers). `Characters` (`Player`, `Enemies`, `KayKitSkeletons`), `Environment` (`Buildings`, `Nature`, `Structures`, `KayKitDecorations`, `TreePack`, `PolyverseSkies`), `Ground` (`Textures`, `Layers`), `Pickups`, `Projectiles`, `Props`, `Weapons`. A pack we did not make keeps its own folder inside its kind, untouched. See [ThirdPartyAssets](ThirdPartyAssets.md).
-- `UI/`: HUD and menu art: `Sprites` (the HUD sprites and their atlas), `Controls`, `Animations`, and the UI prefabs.
+- `UI/`: HUD and menu art: `Sprites` (the HUD sprites and their atlas), `Controls`, `UI Toolkit` (UXML, USS, theme and panel settings, one folder for each part: [UI](UI.md)), and the UI prefabs.
 - `Shaders/`: shaders, shader includes, and the URP assets (renderer, pipeline asset, volume profile, global settings).
 - `AddressableAssetsData/` and `TextMesh Pro/`: made by their packages; the names are fixed.
 - A new asset goes into the folder of what it is; a new kind of thing gets a folder named like its siblings, never `Other` or `New Folder`.

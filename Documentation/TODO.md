@@ -15,7 +15,8 @@ Not done yet. The aim is a small, really good, playable game ([AboutTheGame](Abo
 - [ ] Port the breakables (crates, barrels, pots) and the chest, with their break effect.
 - [ ] Decide the draw method for the environment by measuring clusters against static batching plus LOD groups ([Rendering](Rendering.md)); write the numbers in [Optimizations](Optimizations.md).
 - [ ] Rebuild Level1's ground with the owner's ground tool instead of Unity Terrain, and place props with its prefab tool; then remove the Terrain data and the unused terrain textures.
-- [ ] Rebuild the HUD and the menu in UI Toolkit, with keyboard and gamepad navigation, and delete the Canvas versions ([UI](UI.md)).
+- [x] The HUD and the menu are in UI Toolkit and the Canvas versions are deleted ([UI](UI.md)). Left: gamepad navigation in the menu (it still uses the old Input Manager), the mouse, and a check of the layout at other screen shapes.
+- [ ] `HudAtlas` (packed for uGUI) packs sprites that UI Toolkit now loads as plain textures: measure, then delete it or keep only what is still used ([Optimizations](Optimizations.md)).
 - [ ] Gamepad: every action and every menu works with a gamepad as well as the keyboard.
 
 ## Step 2: systems
@@ -32,8 +33,8 @@ Not done yet. The aim is a small, really good, playable game ([AboutTheGame](Abo
 ## Code and docs (while each script is touched)
 - [ ] Move the comments of a script into its doc and delete them from the script (every script listed under `Code:` in a doc); apply the code rules in CLAUDE.md to it.
 - [ ] Move the hit moment of an attack from the `DealDamage` animation event to a number in the data ([ClipAnimator](Characters/ClipAnimator.md)).
-- [ ] The static `GM`, `Player` and `Cam` fields filled by `GameManager.Awake`: replace with serialized references, and clear any static state at the start of Play.
-- [ ] Sounds: normal references or a small sound table instead of an Addressables load on every play ([GameManager](Managers/GameManager.md)).
+- [ ] The static `SM`, `Player` and `Cam` fields filled by `SceneManager.Awake`: replace with serialized references, and clear any static state at the start of Play.
+- [ ] Sounds: normal references or a small sound table instead of an Addressables load on every play ([SceneManager](Managers/SceneManager.md)).
 - [ ] Rename `AggroTrigger .cs` (a space in the file name) and the `SavedPositon` key.
 - [ ] Player and enemy numbers (health, energy, cooldowns, speeds) into data or constants ([Player](Characters/Player.md)).
 - [ ] `MainMenu`: screens as an enum and one reusable selectable list instead of repeated code ([MainMenu](Managers/MainMenu.md)).

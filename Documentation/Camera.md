@@ -5,7 +5,7 @@ A third-person follow camera with automatic and hotkey rotation, and an X-ray di
 ## Follow and rotate
 - The class is `Cam` (file `Camera.cs`). It sits behind and above the player at `CameraZoom` and `CameraUpPosition`, tilted by `CameraPitch`, and follows every frame.
 - Rotation hotkeys (`rotateCameraInput`) turn it at `CameraHotkeyRotationSpeed`. With no hotkey, moving sideways turns it slowly toward that side (`CameraAutoRotationSpeed`). A dead player does not rotate the camera.
-- `Cam.Player` is a static field that `GameManager.Awake` fills.
+- `Cam.Player` is a static field that `SceneManager.Awake` fills.
 
 ## Occlusion
 - Each frame a ray from the camera to the player (`occludableLayer`) collects the `Occludable` objects it crosses. Hit ones get the X-ray dither (`Hide`), and the ones that were hit last frame and not now come back (`Show`).

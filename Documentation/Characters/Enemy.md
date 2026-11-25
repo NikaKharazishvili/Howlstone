@@ -15,14 +15,14 @@ The four skeleton types (Warrior, Minion, Archer, Mage), their projectiles, the 
 - **Distance switch:** `LOD` on the Player (a sphere of `LODDetectionRadius`) turns the components listed in `OptimizableObject` on and off for enemies and coins entering and leaving it. See [Proximity](../Proximity.md).
 
 ## Projectiles and thorns
-- `EnemyProjectile`: pooled by the `GameManager`. An Arrow flies straight ahead and a Spell flies toward the player. It hurts the player once (a spinning player is safe from a spell), plays an impact sound, and goes away on hit, after `EnemyProjectileLifespan`, or when the player dies.
+- `EnemyProjectile`: pooled by the `SceneManager`. An Arrow flies straight ahead and a Spell flies toward the player. It hurts the player once (a spinning player is safe from a spell), plays an impact sound, and goes away on hit, after `EnemyProjectileLifespan`, or when the player dies.
 - `Hazard`: damages the player while touching it, with a cooldown (`HazardDamageCooldown`).
 
 ## Decorations
 - `Decoration` plays one looping or one-shot pose (Dead, Sitting, Lying) on the one active skeleton variant of the prefab. The clips and the `ClipAnimator` of each variant are fields.
 
 ## Known problems (see [TODO](../TODO.md))
-- `GM` and `Player` are static fields that `GameManager.Awake` fills (the same for the projectiles, `Hazard`, `XPText`). They keep their value between Plays.
+- `SM` and `Player` are static fields that `SceneManager.Awake` fills (the same for the projectiles, `Hazard`, `XPText`). They keep their value between Plays.
 - `DealDamage` is an animation event: a faster animation changes when the hit lands.
 - The three triggers use `GetComponent` on every enter.
 
