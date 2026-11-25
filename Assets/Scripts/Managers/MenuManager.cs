@@ -8,7 +8,7 @@ using static Utils;
 public class MenuManager : MonoBehaviour
 {
     enum MenuScreen { Main, Account, Difficulty, Tips, Loading }
-    const string HiddenClass = "hidden", HiddenPageClass = "page-hidden", SelectedClass = "selected", DimClass = "dim";
+    const string HiddenClass = "hidden", PageBeforeClass = "page-before", PageAfterClass = "page-after", SelectedClass = "selected", DimClass = "dim";
     const float SubmitDelay = 0.2f, FirstRepeatDelay = 0.4f, RepeatDelay = 0.12f;
     const int KeyColumns = 7, DeleteKeyIndex = 26, SaveKeyIndex = 27, NewGameIndex = 0, LoadSavedIndex = 1, TipsIndex = 2, ExitIndex = 3;
     static readonly string[] Difficulties = { "Easy", "Medium", "Hard" };
@@ -91,7 +91,12 @@ public class MenuManager : MonoBehaviour
 
     void Move(int step)
     {
-        if (current == MenuScreen.Tips) ShowTipPage((tipPage + step + tipPages.Count) % tipPages.Count);
+        if (current == MenuScreen.Tips)
+        {
+            int page = tipPage + step;
+            if (page < 0 || page >= tipPages.Count) return;
+            ShowTipPage(page);
+        }
         else
         {
             List<Label> list = items[(int)current];
@@ -105,7 +110,11 @@ public class MenuManager : MonoBehaviour
     void ShowTipPage(int page)
     {
         tipPage = page;
-        for (int i = 0; i < tipPages.Count; i++) tipPages[i].EnableInClassList(HiddenPageClass, i != page);
+        for (int i = 0; i < tipPages.Count; i++)
+        {
+            tipPages[i].EnableInClassList(PageBeforeClass, i < page);
+            tipPages[i].EnableInClassList(PageAfterClass, i > page);
+        }
         pageNumber.text = $"{page + 1} / {tipPages.Count}";
     }
 
