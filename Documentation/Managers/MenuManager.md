@@ -12,7 +12,8 @@ The `Menu` scene's manager: a keyboard-only menu in UI Toolkit (`Assets/UI/UI To
 - It uses the old Input Manager (`Input.GetAxisRaw`, `GetButton`), while the game itself uses the Input System. The project accepts both. No `EventSystem` is needed: nothing is clicked.
 
 - The account name is at most `MaxAccountNameLength` letters, so it always fits its frame (the widest letter, W, measured).
-- **Bug, cause and check:** leaving Tips from page 2 or 3 and entering it again made the pages slide across the screen over the main menu, because the first page was reset with the 0.5 s transition. `ShowFirstTipPageWithoutSliding` puts the class `instant` (no transition) on the Tips screen while it resets the pages. Check: go to page 3, leave, enter again, and take a screenshot right away.
+- The key grid is `KeyColumns` wide: `#Keys` must be wider than `KeyColumns` keys with their margins, or the last key of a row wraps to the next one.
+- **Bug, cause and check:** leaving Tips from page 2 or 3 showed page 1 over the main menu. Page 1 sits at `translate: -120%` of its own box, and the Tips screen slides `+120%` to the right, so page 1 landed at 0 on the screen. `tip-pages` has `overflow: hidden`, so a page outside the box is never drawn. (`ShowFirstTipPageWithoutSliding` fixes a different glitch: the reset on entering.) Check: go to page 3, leave, and take a screenshot in the middle of the slide (slow `transitionDuration`).
 
 ## Known problems (see [TODO](../TODO.md))
 - Load Saved only plays the cancel sound.
