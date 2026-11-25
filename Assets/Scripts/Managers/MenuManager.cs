@@ -19,8 +19,9 @@ public class MenuManager : MonoBehaviour
     readonly VisualElement[] screens = new VisualElement[5];
     readonly List<Label> [] items = new List<Label>[5];
     List<VisualElement> tipPages;
+    List<string> tipTitles;
     VisualElement background, loadingFill;
-    Label accountName, loadingText, pageNumber;
+    Label accountName, loadingText, pageNumber, tipTitle;
     MenuScreen current;
     int selected, tipPage, heldStep, lastLoadingPercent = -1;
     float submitDelay, repeatTimer;
@@ -31,6 +32,7 @@ public class MenuManager : MonoBehaviour
         background = root.Q("Background");
         accountName = root.Q<Label>("AccountName");
         pageNumber = root.Q<Label>("PageNumber");
+        tipTitle = root.Q<Label>("TipTitle");
         loadingText = root.Q<Label>("LoadingText");
         loadingFill = root.Q("LoadingFill");
         screens[(int)MenuScreen.Main] = root.Q("Main");
@@ -44,6 +46,7 @@ public class MenuManager : MonoBehaviour
         items[(int)MenuScreen.Tips] = new List<Label>();
         items[(int)MenuScreen.Loading] = new List<Label>();
         tipPages = screens[(int)MenuScreen.Tips].Query(className: "tip-page").ToList();
+        tipTitles = tipPages.ConvertAll(page => page.Q<Label>(className: "tip-page-title").text);
         items[(int)MenuScreen.Main][0].AddToClassList(SelectedClass);
     }
 
@@ -115,6 +118,7 @@ public class MenuManager : MonoBehaviour
             tipPages[i].EnableInClassList(PageBeforeClass, i < page);
             tipPages[i].EnableInClassList(PageAfterClass, i > page);
         }
+        tipTitle.text = tipTitles[page];
         pageNumber.text = $"{page + 1} / {tipPages.Count}";
     }
 
