@@ -9,14 +9,15 @@ How to write a prompt for a picture generator (UI icons, frames, textures). Read
 
 ## The prompt
 - One block, ready to paste, for exactly what the owner named and nothing else.
-- Each image is a grid with one thing per column and two different ideas per column (2 rows), on a transparent background. ChatGPT makes about 10 pictures in one image, so an image has at most 5 things. The owner always gets ONE text to paste, never several: when there are more than 5 things, that one text shares the style once and asks for several images one after another in the same answer, without questions.
+- **Always exactly ONE image, with everything on it.** The owner has a small free quota of generations: a prompt that asks for several images (or "separate" images) spends it several times over. Never ask for more than one image, however many things are needed. The owner always gets ONE text to paste.
+- The one image is a sheet: a grid on a transparent background, one thing per cell, things of one kind in one row (same size in a row), a clear empty gap between cells and between rows. About 12 to 14 cells fit well. When there are more things, leave out the second look of each (the steel row) first, then the least needed pieces, and say which were left out. Describe the sheet row by row ("row 1: ..., row 2: ...").
 - Say what not to draw (text, letters, logos, people, hands, frames around the pictures, shadows, a checkerboard) and what to draw alone and centered. Use words the generator can not mix up.
 - Anything the game draws itself (a letter on a key, a number, a label) is left empty in the picture: the game puts its text on it, so one picture works for all.
 - A frame or bar that must stretch is described as 9-slice friendly: ornate corners, straight repeating edges, a plain flat center.
 
 ## What gives the game's look (picked by the owner)
 - The dark stone version with gold trim is the look to ask for: smooth clean painted shapes, soft rounded bevels, simple clear highlights, a clean smooth gold gradient, dark stone body with a soft inner glow, strong contrast. Say what to avoid: scratches, grain, noise, dirt, realistic metal texture, thick outlines. The steel row is made but not used.
-- Ask for 3 separate images (keys, gamepad buttons, frames), each with a true alpha channel (a drawn checkerboard or grey background is a failure), one piece centered in each cell, equal size in a row.
+- The sheet has a true alpha channel (a drawn checkerboard or grey background is a failure) and one piece centered in each cell.
 - Keys: empty square, empty wide (twice as wide as tall), square with a bright orange glowing outline for the selected one. The generator draws arrows badly, so arrows are never asked for: the game writes `<` and `>` on an empty key.
 - Gamepad: round dark buttons with a glowing symbol (a letter-X shape made of two diagonal strokes, a ring, a square, a triangle; say "not a plus sign") and one long empty shoulder button.
 - Frames: a wide banner with pointed ornate ends, a thin table header, a large square panel, a thin row, a selection frame with a soft orange glow, each 9-slice friendly.
