@@ -21,6 +21,7 @@ Plays animation clips on any object with an `Animator`, with no Animator Control
 - The hit moment is an event inside the clip. Moving it into a number in the data, so a faster animation cannot change when damage lands, is in [TODO](../TODO.md).
 
 ## Mistakes and checks
+- **Bug, cause and check:** the pause (`Time.timeScale` 0) did not stop the characters: they kept breathing and kept playing footstep sounds. A new `PlayableGraph` is driven by the audio clock (`DSPClock`), which ignores `Time.timeScale`. `Awake` sets `DirectorUpdateMode.GameTime`, so the graph follows `Time.timeScale` and `Time.deltaTime` like everything else. Check: set `Time.timeScale` to 0 and compare the bones' rotations in two frames: they must be equal.
 - The Player's `Idle` and `Move` clips scale with `currentSpeed / 10`, like the old controller did (a state speed driven by a parameter). Without it water and sprint look wrong.
 - A new Animator on a prefab or scene object needs only a `ClipAnimator` next to it and clips in the owner's fields; leave the controller empty.
 - `Play` needs the mixer, which `Awake` makes: never call it from another script's `Awake` before the object has woken.

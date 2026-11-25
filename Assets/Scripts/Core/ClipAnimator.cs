@@ -29,6 +29,7 @@ public partial class ClipAnimator : MonoBehaviour
     void Awake()
     {
         graph = PlayableGraph.Create(name);
+        graph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
         var output = AnimationPlayableOutput.Create(graph, "Animation", animator);
         mixer = AnimationMixerPlayable.Create(graph, 1);
         mixer.SetInputWeight(0, 1);

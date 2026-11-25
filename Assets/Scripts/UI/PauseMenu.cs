@@ -24,6 +24,7 @@ public class PauseMenu : MonoBehaviour
     void Start()
     {
         VisualElement root = document.rootVisualElement;
+        audioSource.ignoreListenerPause = true;
         pause = root.Q("Pause");
         slots = root.Q("Slots");
         slotList = new SaveSlotList(slots);
