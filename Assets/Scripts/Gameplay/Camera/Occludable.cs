@@ -1,30 +1,21 @@
 ﻿using UnityEngine;
 using static GameConstants;
 
-// Attach to any object that should fade when standing between camera and player
 [RequireComponent(typeof(Renderer))]
 public class Occludable : MonoBehaviour
 {
-    new Renderer renderer;
-    MaterialPropertyBlock mpb;
-    static readonly int ColorID = Shader.PropertyToID("_Color");
+    static readonly int CoverFadeID = Shader.PropertyToID("_CoverFade");
+    Renderer meshRenderer;
+    MaterialPropertyBlock hiddenBlock;
 
     void Awake()
     {
-        renderer = GetComponent<Renderer>();
-        mpb = new MaterialPropertyBlock();
+        meshRenderer = GetComponent<Renderer>();
+        hiddenBlock = new MaterialPropertyBlock();
+        hiddenBlock.SetFloat(CoverFadeID, HiddenOccludableFade);
     }
 
-    public void Hide() => SetAlpha(HiddenOccludableAlpha);
+    public void Hide() => meshRenderer.SetPropertyBlock(hiddenBlock);
 
-    public void Show() => SetAlpha(1);
-
-    void SetAlpha(float alpha)
-    {
-        renderer.GetPropertyBlock(mpb);
-        Color c = renderer.material.color;  // fallback
-        c.a = alpha;
-        mpb.SetColor(ColorID, c);
-        renderer.SetPropertyBlock(mpb);
-    }
+    public void Show() => meshRenderer.SetPropertyBlock(null);
 }

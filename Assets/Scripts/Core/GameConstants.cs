@@ -4,7 +4,7 @@ public static class GameConstants
 {
     // Others
     public const float ToggleHudCD = 0.5f;
-    public const float HiddenOccludableAlpha = 0.5f;
+    public const float HiddenOccludableFade = 0.5f;
     public const float LODDetectionRadius = 40;
     public const float AggroRange = 5;
 
