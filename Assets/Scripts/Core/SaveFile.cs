@@ -13,7 +13,7 @@ public class LevelSave { public string scene; public List<string> takenCoins = n
 public class SaveData
 {
     public int version = SaveFile.Version;
-    public string account, difficulty, lastScene = SaveFile.FirstScene;
+    public string account, lastScene = SaveFile.FirstScene;
     public CharacterSave character = new();
     public List<LevelSave> levels = new();
 
@@ -51,9 +51,9 @@ public static class SaveFile
         return data != null && data.version <= Version && !string.IsNullOrEmpty(data.account) ? data : null;
     }
 
-    public static void StartNew(int slot, string account, string difficulty)
+    public static void StartNew(int slot, string account)
     {
-        Current = new SaveData { account = account, difficulty = difficulty };
+        Current = new SaveData { account = account };
         currentSlot = slot;
         Write();
     }

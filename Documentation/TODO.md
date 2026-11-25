@@ -24,7 +24,6 @@ Not done yet. The aim is a small, really good, playable game ([AboutTheGame](Abo
 - [ ] Level flow: progress percent of a level, the next level unlocks at a set percent (a constant), going back to earlier levels, a level select or a path in the menu.
 - [ ] Automatic upgrades: a table of what each level up gives, and the pause menu page that shows it.
 - [ ] Rewards: drops from enemies, chests and breakables.
-- [ ] Remove the difficulty choice from the menu and from the saved data.
 - [ ] Level 2, with its own enemies and challenges.
 - [ ] The pause menu has Resume, Load, Main Menu and Exit ([UI](UI.md)). Still to build: an options menu in UI Toolkit: volume, graphics (resolution, quality, contrast, saturation), key and gamepad rebinding, language. Settings are saved outside `Assets` like the saves.
 - [ ] Localization: string tables from the first text we rebuild, English then Russian.

@@ -7,12 +7,11 @@ using static Utils;
 [RequireComponent(typeof(UIDocument))]
 public class MenuManager : MonoBehaviour
 {
-    enum MenuScreen { Main, Account, Difficulty, Tips, Loading, Slots }
+    enum MenuScreen { Main, Account, Tips, Loading, Slots }
     const string HiddenClass = "hidden", PageBeforeClass = "page-before", PageAfterClass = "page-after", SelectedClass = "selected", DimClass = "dim", OffClass = "off", InstantClass = "instant";
     const int MaxAccountNameLength = 16;
     const float SubmitDelay = 0.2f, FirstRepeatDelay = 0.4f, RepeatDelay = 0.12f;
     const int KeyColumns = 7, DeleteKeyIndex = 26, SaveKeyIndex = 27, NewGameIndex = 0, LoadSavedIndex = 1, TipsIndex = 2, ExitIndex = 3;
-    static readonly string[] Difficulties = { "Easy", "Medium", "Hard" };
 
     [SerializeField] AudioClip selectionSound, submitSound, cancelSound, keyboardSound;
     [SerializeField] AudioSource audioSource;
@@ -26,9 +25,8 @@ public class MenuManager : MonoBehaviour
     VisualElement background, loadingFill, pageLeft, pageRight;
     Label accountName, loadingText, pageNumber, tipTitle;
     MenuScreen current;
-    string chosenDifficulty;
     bool isChoosingNewGameSlot;
-    int selected, tipPage, heldStep, lastLoadingPercent = -1;
+    int chosenSlot, selected, tipPage, heldStep, lastLoadingPercent = -1;
     float submitDelay, repeatTimer;
 
     void Start()
@@ -44,12 +42,10 @@ public class MenuManager : MonoBehaviour
         loadingFill = root.Q("LoadingFill");
         screens[(int)MenuScreen.Main] = root.Q("Main");
         screens[(int)MenuScreen.Account] = root.Q("Account");
-        screens[(int)MenuScreen.Difficulty] = root.Q("Difficulty");
         screens[(int)MenuScreen.Tips] = root.Q("Tips");
         screens[(int)MenuScreen.Loading] = root.Q("Loading");
         items[(int)MenuScreen.Main] = screens[(int)MenuScreen.Main].Query<Label>(className: "item").ToList();
         items[(int)MenuScreen.Account] = screens[(int)MenuScreen.Account].Query<Label>(className: "key").ToList();
-        items[(int)MenuScreen.Difficulty] = screens[(int)MenuScreen.Difficulty].Query<Label>(className: "item").ToList();
         items[(int)MenuScreen.Tips] = new List<Label>();
         items[(int)MenuScreen.Loading] = new List<Label>();
         screens[(int)MenuScreen.Slots] = root.Q("Slots");
@@ -94,7 +90,7 @@ public class MenuManager : MonoBehaviour
         int horizontalStep = horizontal > 0 ? 1 : horizontal < 0 ? -1 : 0, verticalStep = vertical > 0 ? -1 : vertical < 0 ? 1 : 0;
         switch (current)
         {
-            case MenuScreen.Main: case MenuScreen.Difficulty: case MenuScreen.Slots: return verticalStep;
+            case MenuScreen.Main: case MenuScreen.Slots: return verticalStep;
             case MenuScreen.Account: return horizontalStep != 0 ? horizontalStep : verticalStep * KeyColumns;
             case MenuScreen.Tips: return horizontalStep;
             case MenuScreen.Loading: return 0;
@@ -150,8 +146,7 @@ public class MenuManager : MonoBehaviour
         {
             case MenuScreen.Main: SubmitMainItem(); break;
             case MenuScreen.Account: SubmitKey(); break;
-            case MenuScreen.Difficulty: ChooseDifficulty(); break;
-            case MenuScreen.Slots: if (isChoosingNewGameSlot) StartGame(); else LoadSelectedSlot(); break;
+            case MenuScreen.Slots: if (isChoosingNewGameSlot) ChooseNewGameSlot(); else LoadSelectedSlot(); break;
             case MenuScreen.Tips: break;
             case MenuScreen.Loading: break;
             default: throw new NotImplementedException(current.ToString());
@@ -162,7 +157,7 @@ public class MenuManager : MonoBehaviour
     {
         switch (selected)
         {
-            case NewGameIndex: audioSource.PlayOneShot(submitSound); ShowScreen(MenuScreen.Account); break;
+            case NewGameIndex: audioSource.PlayOneShot(submitSound); ShowSlots(true); break;
             case LoadSavedIndex: audioSource.PlayOneShot(submitSound); ShowSlots(false); break;
             case TipsIndex: audioSource.PlayOneShot(submitSound); ShowScreen(MenuScreen.Tips); break;
             case ExitIndex: QuitGame(); break;
@@ -170,11 +165,12 @@ public class MenuManager : MonoBehaviour
         }
     }
 
-    void ChooseDifficulty()
+    void ChooseNewGameSlot()
     {
-        chosenDifficulty = Difficulties[selected];
+        if (!slotList.ConfirmOverwrite(selected)) { audioSource.PlayOneShot(cancelSound); return; }
+        chosenSlot = selected;
         audioSource.PlayOneShot(submitSound);
-        ShowSlots(true);
+        ShowScreen(MenuScreen.Account);
     }
 
     void ShowSlots(bool forNewGame)
@@ -201,8 +197,7 @@ public class MenuManager : MonoBehaviour
         else if (selected == SaveKeyIndex)
         {
             if (accountName.text.Length == 0) { audioSource.PlayOneShot(cancelSound); return; }
-            audioSource.PlayOneShot(submitSound);
-            ShowScreen(MenuScreen.Difficulty);
+            StartGame();
         }
         else if (accountName.text.Length < MaxAccountNameLength)
         {
@@ -214,8 +209,7 @@ public class MenuManager : MonoBehaviour
 
     void StartGame()
     {
-        if (!slotList.ConfirmOverwrite(selected)) { audioSource.PlayOneShot(cancelSound); return; }
-        SaveFile.StartNew(selected, accountName.text, chosenDifficulty);
+        SaveFile.StartNew(chosenSlot, accountName.text);
         audioSource.PlayOneShot(selectionSound);
         LoadSavedScene();
     }

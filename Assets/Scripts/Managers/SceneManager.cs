@@ -16,7 +16,7 @@ public class SceneManager : MonoBehaviour
     [field: SerializeField] public XPText[] XpTexts { get; private set; }
 
     [SerializeField] GameObject coinsParent, enemiesParent, breakablesParent;
-    const string TestAccount = "Player", TestDifficulty = "Medium";
+    const string TestAccount = "Player";
     int currentCoins, maxCoins, currentKills, maxKills, currentBreaks, maxBreaks;
     bool isHudOn = true, canToggleHud = true;
 
@@ -32,7 +32,7 @@ public class SceneManager : MonoBehaviour
     void Awake()
     {
         Instance = this;
-        if (SaveFile.Current == null && !SaveFile.LoadFirstFilledSlot()) SaveFile.StartNew(0, TestAccount, TestDifficulty);
+        if (SaveFile.Current == null && !SaveFile.LoadFirstFilledSlot()) SaveFile.StartNew(0, TestAccount);
         Player.SM = this;
         Cam.Player = Player;
         ShurikenProjectile.SM = this;
