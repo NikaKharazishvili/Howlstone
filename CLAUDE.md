@@ -18,6 +18,7 @@
 - Do exactly what I say, in full, the first time: before the answer, check every item of my message and finish each one. Never swap it for a smaller or different version, never skip an item quietly, and never decide by yourself that something I said is not needed. If an item can't be done, say which one and why in the same answer.
 - Every name must be clear on its own: when you create, rename or touch an asset, list its folder and fix names that look alike (equal after ignoring spaces, underscores and case), are vague, or break their folder's naming style (Documentation/ProjectStructure.md). Fix it yourself, then tell me in one line. Never wait for me to notice.
 - A file that is moved or renamed moves with its `.meta`, and the code and docs are searched for its old path first.
+- Git is the history of our work. I commit and push by myself after each finished task or safe step, with a clear message of what changed and why, without asking. Never commit the private toolkit, secrets or a broken state. Before a risky change, commit first. When something breaks, check `git log` and `git diff` first.
 
 # What We Are Making
 - Howlstone: a small single-player 3D action-adventure in Unity 6.3 (URP), finished into a small but really good, playable game: at least one polished scene, a real saving system, clean code and docs, good performance. Read Documentation/AboutTheGame.md before any feature work.
