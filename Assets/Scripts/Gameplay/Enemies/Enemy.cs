@@ -25,6 +25,17 @@ public class Enemy : MonoBehaviour
     [SerializeField] new Collider collider;
     [SerializeField] AudioSource audioSource;
 
+    static readonly int CoverFadeID = Shader.PropertyToID("_CoverFade");
+    Renderer[] renderers;
+    MaterialPropertyBlock fadeBlock;
+    float deathFadeTime = EnemyDeathDeactivateDelay;
+
+    void Awake()
+    {
+        renderers = GetComponentsInChildren<Renderer>(true);
+        fadeBlock = new MaterialPropertyBlock();
+    }
+
     void Start()
     {
         startingPosition = transform.position;
@@ -38,6 +49,21 @@ public class Enemy : MonoBehaviour
     {
         PatrolDetectChase();
         UpdateLocomotionAnimation();
+        DitherFadeWhileDying();
+    }
+
+    void DitherFadeWhileDying()
+    {
+        if (deathFadeTime >= EnemyDeathDeactivateDelay) return;
+        deathFadeTime += Time.deltaTime;
+        fadeBlock.SetFloat(CoverFadeID, Mathf.Clamp01(deathFadeTime / EnemyDeathDeactivateDelay));
+        foreach (Renderer renderer in renderers) renderer.SetPropertyBlock(fadeBlock);
+    }
+
+    void ClearDeathFade()
+    {
+        deathFadeTime = EnemyDeathDeactivateDelay;
+        foreach (Renderer renderer in renderers) renderer.SetPropertyBlock(null);
     }
 
     // Idle when standing, running when chasing or returning, walking when patrolling, unless a one-time clip is playing
@@ -119,6 +145,7 @@ public class Enemy : MonoBehaviour
         hasTarget = false;
         isGoingBack = false;
         collider.enabled = false;
+        deathFadeTime = 0;
         agent.ResetPath();
         clipAnimator.Play(diedByPlayer ? death1Clip : death2Clip);
         if (diedByPlayer) GM.PlaySound(audioSource, SoundType.PlayerHitEnemy1, SoundType.PlayerHitEnemy2, SoundType.PlayerHitEnemy3, SoundType.PlayerHitEnemy4, SoundType.PlayerHitEnemy5, SoundType.PlayerHitEnemy6);
@@ -135,6 +162,7 @@ public class Enemy : MonoBehaviour
         this.Wait(EnemyRespawnInterval, e =>
         {
             e.gameObject.SetActive(true);
+            e.ClearDeathFade();
             e.collider.enabled = true;
             e.agent.Warp(e.startingPosition);
             e.clipAnimator.Play(e.respawnClip, RespawnSpeed);

@@ -10,8 +10,8 @@ Not done yet. The aim is a small, really good, playable game ([AboutTheGame](Abo
   - [ ] Blob shadows (ground circles) and the fake lights (`PointLight`) with their scripts.
   - [ ] Write this project's own docs for each (the other project's shader docs are not copied: they describe its own game and the private toolkit).
 - [x] URP reduced to one PC renderer and one pipeline asset (the Mobile ones and the sample profile are deleted, shadows and extra lighting features are off in the URP asset, one PC quality level with shadows off). Left: the real directional lights in both scenes stay until the Universal shader and the day and night control replace them.
-- [ ] Replace the transparent fading of covering objects with the X-ray dither of the Universal shader ([Camera](Camera.md)).
-- [ ] Move every material to the Universal shader; delete the old shaders and the pack shaders that nothing uses.
+- [x] Covering objects and dying enemies use the X-ray dither of the Universal shader ([Camera](Camera.md)). The separate X-ray renderer feature and material are not needed: the covering object is see-through, so the player is never hidden.
+- [x] Every material uses the Universal shader; the old shaders and the unused pack shaders are deleted.
 - [ ] Port the breakables (crates, barrels, pots) and the chest, with their break effect.
 - [ ] Decide the draw method for the environment by measuring clusters against static batching plus LOD groups ([Rendering](Rendering.md)); write the numbers in [Optimizations](Optimizations.md).
 - [ ] Rebuild Level1's ground with the owner's ground tool instead of Unity Terrain, and place props with its prefab tool; then remove the Terrain data and the unused terrain textures.
