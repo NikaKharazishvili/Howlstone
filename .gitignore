@@ -1,0 +1,22 @@
+/Library
+/Logs
+/Temp
+/UserSettings
+/obj
+*.csproj
+*.slnx
+.vscode/
+.vsconfig
+/Build/
+/Builds/
+
+# Showcase repository: only code and docs are public (art, audio, scenes and packs are not)
+/Assets/*
+!/Assets/Scripts/
+!/Assets/Scripts.meta
+
+# Private toolkit
+/Assets/Scripts/Nikson/
+/Assets/Scripts/Nikson.meta
+/Documentation/Nikson/
+/.claude/rules/nikson.md

@@ -1,0 +1,45 @@
+using UnityEngine;
+using static GameConstants;
+
+/// <summary>Pooled by Enemy to shot specific projectile to the Player.</summary>
+public class EnemyProjectile : MonoBehaviour
+{
+    public static GameManager GM; // Initialized by GameManager
+    public static Player Player; // Initialized by GameManager
+    [SerializeField] GameObject[] projectileTypeToActivate;
+    int projectileType;
+    float lifespan;
+    bool alreadyHit;
+
+    void Update()
+    {
+        // If the projectile is an Arrow, it will move in the direction it is facing; if it's a Spell, it will move towards the Player. Arrow moves faster
+        if (projectileType == (int)EnemyProjectileType.Arrow) transform.position += transform.forward.normalized * EnemyProjectileArrowSpeed * Time.deltaTime;
+        else transform.position += (Player.transform.position - transform.position + Vector3.up).normalized * EnemyProjectileSpellSpeed * Time.deltaTime;
+
+        // When its lifespan reaches 0 or when the Player dies, disable the projectile to be pooled again later
+        if (lifespan <= 0 || !Player.IsAlive) gameObject.SetActive(false);
+        else lifespan -= Time.deltaTime;
+    }
+
+    public void Shoot(Transform shooter, EnemyProjectileType projectileType)
+    {
+        alreadyHit = false;
+        this.projectileType = (int)projectileType;
+        // Projectile teleports near the shooter Enemy with correct rotation
+        transform.position = shooter.position + shooter.up;
+        transform.rotation = shooter.rotation;
+        lifespan = EnemyProjectileLifespan;
+        for (int i = 0; i < projectileTypeToActivate.Length; i++) projectileTypeToActivate[i].SetActive(i == this.projectileType - 1);
+        gameObject.SetActive(true);
+    }
+
+    void OnTriggerEnter(Collider collision)
+    {
+        if (!collision.gameObject.CompareTag(TagPlayer) || alreadyHit) return;
+        alreadyHit = true;
+        if (projectileType != (int)EnemyProjectileType.Spell || !Player.isSpinning) Player.TakeDamage();
+        Player.DamageSound(projectileType != (int)EnemyProjectileType.Spell ? SoundType.ArrowImpact : SoundType.SpellImpact);
+        gameObject.SetActive(false);
+    }
+}

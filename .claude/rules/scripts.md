@@ -1,0 +1,16 @@
+---
+paths:
+  - "Assets/Scripts/**"
+---
+- Never write `private` before a field or method (it is the default). Write a color as a literal the editor can show as a swatch: `new Color(0.5f, 0.2f, 0.1f)`, never a hex string. The hook (`CodeRules.ps1`) reports both.
+- Static fields keep their values between Plays when the domain is not reloaded: a static list or field that holds per-Play state is cleared at the start of Play, or it is an instance field of a scene object.
+- Never set `enabled = false` in `Awake` and `enabled = true` in the same call or frame: `OnEnable` runs twice.
+- A change that removes the last use of something (a field, method, constant, parameter, asset slot, doc line) deletes it in the same change: search its name once before finishing.
+- Protect encapsulation: a class's state is changed only by that class's own methods. Other classes get only what they need, to read it or to ask for a change.
+- Anything read from a save file can be missing, empty or from an older version: read it through one method that gives a safe value, never index it directly. A file the game writes at run time never lives inside `Assets` (Documentation/Saving.md).
+- `GetComponentsInChildren` without `true` still returns components under a disabled root object: check `activeInHierarchy` when disabled objects must be left out.
+- A sound plays where it comes from: a character's sound on its own `AudioSource` (3D, mono clip). Only UI and the player's own sounds are 2D.
+- `this.Wait` lambdas use the parameter they get, never `this` or a local variable (a closure allocates again).
+- An animation event calls a method by name: renaming `DealDamage` or `PlayRandomFootstepSound` breaks the clips silently. Search the clips before renaming.
+- Before moving, renaming or deleting an asset, search the code and docs for its path and name: an `AssetDatabase` call or a path string breaks only later, as an empty value or a pink object.
+- Never use a type, namespace or file from the private toolkit in game code (CLAUDE.md - Public Repository).- No `Light` component and no shadow caster or receiver, ever: blob shadows and fake lights only, as in Documentation/Rendering.md. A system ported from the owner's top-down project is reviewed for top-down assumptions first.
