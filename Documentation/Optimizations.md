@@ -3,7 +3,7 @@
 Before testing an idea, read "Not used" and "Tried and removed". A number belongs here only when it was measured: write the scene and what was measured.
 
 ## Used
-- Sprite atlas: the HUD sprites are packed in one atlas (`HudAtlas`), compressed once at high quality.
+- UI images are plain textures (no Sprite Atlas): UI Toolkit batches them itself. Measured in the editor, Level1, game view, player standing: 23 batches and 17 SetPass calls with two Sprite Atlases and the same with both deleted; hiding the whole HUD gives 22 and 16, so the whole HUD (icons, bars, texts) costs 1 batch.
 - Texture compression and mipmaps on 3D textures; Read/Write off on textures, models and meshes ([ProjectStructure](ProjectStructure.md)).
 - Mono for world-positioned sounds, streaming for music.
 - Pooling: shuriken projectiles, enemy projectiles and XP texts are pooled (arrays in the `SceneManager`).
@@ -22,4 +22,4 @@ Before testing an idea, read "Not used" and "Tried and removed". A number belong
 - Cache the `Enemy` component found in the triggers.
 
 ## Tried and removed
-- Nothing yet.
+- Sprite Atlas for the UI Toolkit images (see "Used"): no change in batches or SetPass calls, so it was removed.
