@@ -7,6 +7,8 @@ UI Toolkit only, no Canvas and no uGUI. The files are in `Assets/UI/UI Toolkit`:
 - Show and hide with a USS class (`hidden`) and a `translate` transition, never by turning the object off (that rebuilds the elements).
 - The root of a document starts at the screen's top left and fills it only because `Common.uss` says so (the theme is empty).
 - A part's object is off in the scene when its owner must bind it before anything reads it (the HUD): the owner turns it on, then calls `Bind`. A part on an object that is on (the menu) binds in `Start`, after every `UIDocument` is enabled.
+- A bar hides part of its picture, never squeezes it: the fill is a clip element (its width is the percent, `overflow: hidden`) holding the picture at the bar's full pixel width, so the picture keeps its size and is cut. The picture's width in USS must equal its bar's.
+- The font is the plain `.ttf` in `Common.uss`: a TextMesh Pro font asset drew no text at all in UI Toolkit here.
 - An element name is unique in its UXML. `picking-mode="Ignore"` on every element that is not clicked.
 - A new part's USS rules never repeat what `Common.uss` has.
 
