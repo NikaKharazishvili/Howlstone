@@ -55,3 +55,4 @@
 - Folders, names, import settings and moving assets: Documentation/ProjectStructure.md whole.
 - Saving: Documentation/Saving.md whole.
 - Packs: Documentation/ThirdPartyAssets.md.
+- A prompt for a picture generator: Documentation/ChatGPTPrompts.md whole.
