@@ -1,6 +1,6 @@
 # Rendering
 
-How the game is drawn. **Almost all of this is decided and not built yet.** The project still has the default URP settings and real lights. Anything built here must follow it, and the measured numbers go in [Optimizations](Optimizations.md).
+How the game is drawn. **This is the plan; what is already built is listed under URP.** Anything built here must follow it, and the measured numbers go in [Optimizations](Optimizations.md).
 
 ## Rules
 - **No real light, no real shadow, ever.** No `Light` component, no shadow caster or receiver setting, no baked lighting. The URP asset and every quality level have shadows off. The sun's colour comes from the day and night control; shadows under things are blob shadows.
@@ -25,7 +25,9 @@ How the game is drawn. **Almost all of this is decided and not built yet.** The 
 - The other project is top-down, so its systems assume it: no LOD, no occlusion culling, a short view distance, ground circles sized for a high camera, wind and height shading tuned for a view from above. Every ported system is copied, then reviewed for those assumptions and measured here before it is trusted (view distance, culling, shader costs, fake light distances).
 
 ## URP
-- Done: one PC renderer and one pipeline asset (`Assets/Shaders`), one PC quality level, shadows off in both. Cavity shading becomes a feature of the PC renderer when it is ported. The real directional lights stay until the Universal shader and the day and night control exist.
+- Done: one PC renderer and one pipeline asset (`Assets/Shaders`), one PC quality level, shadows off in both. The `Universal` shader, the ground shaders, the shader globals and cavity shading (a feature of the PC renderer) are ported. Every world material uses `Universal` (Environment, Character, Water or Additive surface type).
+- Not done: the day and night control, the fake lights in the scene, the real directional lights are still there until then.
+- Bug: an opaque material on the old plain unlit shader drew nothing under this renderer (cause not measured), while a queue 3000 one drew. Check: a new object that is outlined in the scene but not drawn has a material that is not `Universal`.
 
 ## Platform
 - Windows PC. Mobile and WebGL are not targets, so nothing is kept for them.
