@@ -3,7 +3,7 @@ using UnityEngine.UIElements;
 
 public class SaveSlotList
 {
-    const string ErasePrompt = "Press Delete again to erase", EmptyText = "Empty";
+    const string ErasePrompt = "Press Delete again to erase", EmptyText = "Empty", EraseClass = "erase";
     readonly Label heading;
     int slotToErase = -1;
 
@@ -44,11 +44,13 @@ public class SaveSlotList
         CancelErase();
         slotToErase = slot;
         Slots[slot].text = ErasePrompt;
+        Slots[slot].AddToClassList(EraseClass);
         return false;
     }
 
     void ShowSlotText(int slot)
     {
+        Slots[slot].RemoveFromClassList(EraseClass);
         SaveData data = SaveFile.Read(slot);
         Slots[slot].text = data == null ? EmptyText : data.account;
     }
