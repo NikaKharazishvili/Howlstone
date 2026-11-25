@@ -154,11 +154,18 @@ public class MenuManager : MonoBehaviour
         switch (selected)
         {
             case NewGameIndex: audioSource.PlayOneShot(submitSound); ShowScreen(MenuScreen.Account); break;
-            case LoadSavedIndex: audioSource.PlayOneShot(cancelSound); break;
+            case LoadSavedIndex: LoadLatestSave(); break;
             case TipsIndex: audioSource.PlayOneShot(submitSound); ShowScreen(MenuScreen.Tips); break;
-            case ExitIndex: Exit(); break;
+            case ExitIndex: QuitGame(); break;
             default: throw new NotImplementedException(selected.ToString());
         }
+    }
+
+    void LoadLatestSave()
+    {
+        if (!SaveFile.LoadLatest()) { audioSource.PlayOneShot(cancelSound); return; }
+        audioSource.PlayOneShot(submitSound);
+        LoadSavedScene();
     }
 
     void SubmitKey()
@@ -184,11 +191,15 @@ public class MenuManager : MonoBehaviour
 
     void StartGame()
     {
-        PlayerPrefs.SetString("Account", accountName.text);
-        PlayerPrefs.SetString(accountName.text + "_Difficulty", Difficulties[selected]);
+        SaveFile.StartNew(accountName.text, Difficulties[selected]);
         audioSource.PlayOneShot(selectionSound);
+        LoadSavedScene();
+    }
+
+    void LoadSavedScene()
+    {
         ShowScreen(MenuScreen.Loading);
-        StartCoroutine(LoadSceneAsync("Level1", ShowLoadingProgress, 0.5f));
+        StartCoroutine(LoadSceneAsync(SaveFile.Current.lastScene, ShowLoadingProgress, 0.5f));
     }
 
     void GoBackToMain()
@@ -219,14 +230,5 @@ public class MenuManager : MonoBehaviour
         lastLoadingPercent = percent;
         loadingText.text = $"Loading {percent}%";
         loadingFill.style.width = Length.Percent(percent);
-    }
-
-    void Exit()
-    {
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
     }
 }

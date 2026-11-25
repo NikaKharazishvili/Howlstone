@@ -20,13 +20,13 @@ Not done yet. The aim is a small, really good, playable game ([AboutTheGame](Abo
 - [ ] Gamepad: every action and every menu works with a gamepad as well as the keyboard.
 
 ## Step 2: systems
-- [ ] A real saving system ([Saving](Saving.md)): one class owns it, a file outside `Assets`, versioned and safe to read. Saves the account, the character (XP, level, upgrades), and for each level its progress and exactly which coins, chests and breakables were taken. The menu's Load works.
+- [x] A real saving system ([Saving](Saving.md)): `SaveFile`, a versioned file outside `Assets`, the menu's Load Saved and the pause menu's Save and Load. Left: breakables, chests, the progress percent, health and upgrades, and a list of accounts.
 - [ ] Level flow: progress percent of a level, the next level unlocks at a set percent (a constant), going back to earlier levels, a level select or a path in the menu.
 - [ ] Automatic upgrades: a table of what each level up gives, and the pause menu page that shows it.
 - [ ] Rewards: drops from enemies, chests and breakables.
 - [ ] Remove the difficulty choice from the menu and from the saved data.
 - [ ] Level 2, with its own enemies and challenges.
-- [ ] Pause menu and options menu in UI Toolkit: volume, graphics (resolution, quality, contrast, saturation), key and gamepad rebinding, language. Settings are saved outside `Assets` like the saves.
+- [ ] The pause menu has Resume, Save, Load, Main Menu and Exit ([UI](UI.md)). Still to build: an options menu in UI Toolkit: volume, graphics (resolution, quality, contrast, saturation), key and gamepad rebinding, language. Settings are saved outside `Assets` like the saves.
 - [ ] Localization: string tables from the first text we rebuild, English then Russian.
 - [ ] A death screen.
 
@@ -35,7 +35,7 @@ Not done yet. The aim is a small, really good, playable game ([AboutTheGame](Abo
 - [ ] Move the hit moment of an attack from the `DealDamage` animation event to a number in the data ([ClipAnimator](Characters/ClipAnimator.md)).
 - [ ] The static `SM`, `Player` and `Cam` fields filled by `SceneManager.Awake`: replace with serialized references, and clear any static state at the start of Play.
 - [ ] Sounds: normal references or a small sound table instead of an Addressables load on every play ([SceneManager](Managers/SceneManager.md)).
-- [ ] Rename `AggroTrigger .cs` (a space in the file name) and the `SavedPositon` key.
+- [ ] Rename `AggroTrigger .cs` (a space in the file name) .
 - [ ] Player and enemy numbers (health, energy, cooldowns, speeds) into data or constants ([Player](Characters/Player.md)).
 - [ ] `MenuManager` is built (screens as an enum, one selectable list) ([MenuManager](Managers/MenuManager.md)).
 - [ ] Non-allocating camera cast and cached trigger components ([Optimizations](Optimizations.md)).

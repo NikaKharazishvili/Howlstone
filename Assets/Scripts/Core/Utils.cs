@@ -35,6 +35,15 @@ public static class Utils
         return grounded;
     }
 
+    public static void QuitGame()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
+
     public static IEnumerator LoadSceneAsync(string sceneName, System.Action<float> showProgress, float briefDelay = 0)
     {
         AsyncOperation operation = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneName);

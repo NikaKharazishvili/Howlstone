@@ -27,7 +27,7 @@ The player (the free ninja for now, a humanoid wolf later). One `Player` class s
 
 ## Known problems (see [TODO](../TODO.md))
 - Starting health, energy, cooldowns and speeds are written in `LoadPlayerStats` and in field initializers, not in `GameConstants`.
-- `SavePlayerData` is never called, and the saved health is never read.
+- The level, XP and position are saved and loaded ([Saving](../Saving.md)); health is not saved.
 - `FindAndShootNearestEnemy` builds its layer mask from the tag name `TagEnemy`: a layer with the same name must exist, or no enemy is ever found.
 
 **Code:**

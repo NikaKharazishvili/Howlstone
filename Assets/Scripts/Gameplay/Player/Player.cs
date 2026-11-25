@@ -156,28 +156,27 @@ public partial class Player : MonoBehaviour
         spinTime = 0.8f;
         spinCD = spinReady;
         throwCD = throwReady;
-        SM.Hud.SetLevel(level);
-        SM.Hud.SetXp(currentXP, maxXP);
         SM.Hud.SetHealth(currentHealth, maxHealth);
 
-        if (PlayerPrefs.GetInt(SM.AccountAndSceneName + "SavedPositon") == 1)
-        {
-            respawnPosition = new Vector3(PlayerPrefs.GetFloat(SM.AccountAndSceneName + "PosX"), PlayerPrefs.GetFloat(SM.AccountAndSceneName + "PosY"), PlayerPrefs.GetFloat(SM.AccountAndSceneName + "PosZ"));
-            transform.position = respawnPosition;
-        }
-        else respawnPosition = transform.position;
+        CharacterSave character = SaveFile.Current.character;
+        level = character.level;
+        currentXP = character.xp;
+        maxXP = character.maxXp;
+        SM.Hud.SetLevel(level);
+        SM.Hud.SetXp(currentXP, maxXP);
+
+        LevelSave levelSave = SaveFile.Current.GetLevel(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+        if (levelSave.hasPosition) transform.position = levelSave.position;
+        respawnPosition = transform.position;
     }
 
-    public void SavePlayerData()
+    public void WriteSave(CharacterSave character, LevelSave levelSave)
     {
-        PlayerPrefs.SetFloat(PlayerPrefs.GetString("Account") + "_" + "CurrentHealth", currentHealth);
-        PlayerPrefs.SetFloat(PlayerPrefs.GetString("Account") + "_" + "MaxHealth", maxHealth);
-
-        PlayerPrefs.SetInt(SM.AccountAndSceneName + "SavedPositon", 1);
-        PlayerPrefs.SetFloat(SM.AccountAndSceneName + "PosX", transform.position.x);
-        PlayerPrefs.SetFloat(SM.AccountAndSceneName + "PosY", transform.position.y);
-        PlayerPrefs.SetFloat(SM.AccountAndSceneName + "PosZ", transform.position.z);
-        PlayerPrefs.Save();
+        character.level = level;
+        character.xp = currentXP;
+        character.maxXp = maxXP;
+        levelSave.hasPosition = true;
+        levelSave.position = transform.position;
     }
 
     // Triggered by moving animation

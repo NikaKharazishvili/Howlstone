@@ -15,6 +15,9 @@
 !/Assets/Scripts/
 !/Assets/Scripts.meta
 
+# Save files the game writes at run time
+/Saves/
+
 # Private toolkit
 /Assets/Scripts/Nikson/
 /Assets/Scripts/Nikson.meta

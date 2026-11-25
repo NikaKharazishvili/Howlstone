@@ -7,7 +7,6 @@ public class SceneManager : MonoBehaviour
 {
     public static SceneManager Instance;
 
-    [field: SerializeField] public string AccountAndSceneName { get; private set; }
     [field: SerializeField] public Player Player { get; private set; }
     [field: SerializeField] public Transform Camera { get; private set; }
     [field: SerializeField] public Hud Hud { get; private set; }
@@ -17,14 +16,9 @@ public class SceneManager : MonoBehaviour
     [field: SerializeField] public XPText[] XpTexts { get; private set; }
 
     [SerializeField] GameObject coinsParent, enemiesParent, breakablesParent;
+    const string TestAccount = "Player", TestDifficulty = "Medium";
     int currentCoins, maxCoins, currentKills, maxKills, currentBreaks, maxBreaks;
     bool isHudOn = true, canToggleHud = true;
-
-    void DeleteAllPlayerPrefs()
-    {
-        PlayerPrefs.DeleteAll();
-        foreach (Transform coin in coinsParent.transform) coin.gameObject.SetActive(true);
-    }
 
     void SetUpScene()
     {
@@ -38,6 +32,7 @@ public class SceneManager : MonoBehaviour
     void Awake()
     {
         Instance = this;
+        if (SaveFile.Current == null && !SaveFile.LoadLatest()) SaveFile.StartNew(TestAccount, TestDifficulty);
         Player.SM = this;
         Cam.Player = Player;
         ShurikenProjectile.SM = this;
@@ -86,10 +81,9 @@ public class SceneManager : MonoBehaviour
 
     void LoadData()
     {
-        AccountAndSceneName = $"{PlayerPrefs.GetString("Account")}_{UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}_";
-        currentCoins = PlayerPrefs.GetInt(AccountAndSceneName + "TakenCoinsCount", 0);
-        currentKills = PlayerPrefs.GetInt(AccountAndSceneName + "Kills", 0);
-        currentBreaks = PlayerPrefs.GetInt(AccountAndSceneName + "Breaks", 0);
+        LevelSave level = SaveFile.Current.GetLevel(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+        currentCoins = level.takenCoins.Count;
+        currentKills = level.kills;
 
         maxCoins = coinsParent.transform.childCount;
         maxKills = enemiesParent.transform.childCount;
@@ -99,18 +93,19 @@ public class SceneManager : MonoBehaviour
         Hud.SetKills(currentKills, maxKills);
         Hud.SetBreaks(currentBreaks, maxBreaks);
 
-        foreach (Transform coin in coinsParent.transform) coin.gameObject.SetActive(PlayerPrefs.GetInt(AccountAndSceneName + coin.name, 0) == 0);
+        foreach (Transform coin in coinsParent.transform) coin.gameObject.SetActive(!level.takenCoins.Contains(coin.name));
     }
 
-    void SaveData()
+    public void SaveGame()
     {
-        int takenCoinsCount = 0;
+        string scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        LevelSave level = SaveFile.Current.GetLevel(scene);
+        level.takenCoins.Clear();
         foreach (Transform coin in coinsParent.transform)
-            if (!coin.gameObject.activeSelf)
-            {
-                takenCoinsCount++;
-                PlayerPrefs.SetInt(AccountAndSceneName + coin.name, 1);
-            }
-        PlayerPrefs.SetInt(AccountAndSceneName + "TakenCoinsCount", takenCoinsCount);
+            if (!coin.gameObject.activeSelf) level.takenCoins.Add(coin.name);
+        level.kills = currentKills;
+        Player.WriteSave(SaveFile.Current.character, level);
+        SaveFile.Current.lastScene = scene;
+        SaveFile.Write();
     }
 }

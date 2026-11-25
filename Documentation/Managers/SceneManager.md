@@ -13,7 +13,6 @@ The level's manager and global referencer (`SceneManager.Instance`), named like 
 ## Known problems (see [TODO](../TODO.md))
 - Nothing shows "You won!".
 - Sounds are loaded through Addressables on every play (a load handle each time, never released) although they are in every scene. `PlaySound` also makes a `params` array on each call.
-- `DeleteAllPlayerPrefs` has no caller.
 
 **Code:**
 - `Assets/Scripts/Managers/SceneManager.cs`

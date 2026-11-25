@@ -22,6 +22,12 @@ UI Toolkit only, no Canvas and no uGUI. The files are in `Assets/UI/UI Toolkit`:
 - The event text (`ShowEvent`) clears itself after a few seconds.
 - The progress text always shows 0% and the quest text is fixed in the UXML ([TODO](TODO.md)).
 
+## Pause menu
+- `PauseMenu` is on the `Hud` object and uses its document: the `Pause` element (the last child, so it draws over the HUD) slides in from above with `screen` and `hidden`, as the menu screens do. Cancel (Escape) opens and closes it, and it sets `Time.timeScale` to 0 while open (UI transitions and sounds still run).
+- Entries: Resume, Save Game (`SceneManager.SaveGame`, then closes and shows "Game saved"), Load Game (`SaveFile.ReloadCurrent`, then reloads the scene; the cancel sound when there is no save), Main Menu, Exit ([Saving](Saving.md)).
+- Up and Down select (one step for each press), Submit chooses. It uses the old Input Manager like the main menu.
+- `screen`, `heading`, `item` and `item.selected` are in `Common.uss`, shared with the main menu.
+
 ## XPText
 - A pooled 3D text that shows "XP +n" above a dead enemy, floats up, keeps the same size on screen at any distance (`Utils.SetScreenSizeBillboard`) and switches off after `XpTextLifespan`.
 - `XPText.Cam` is a static field that `SceneManager.Awake` fills.
@@ -29,3 +35,4 @@ UI Toolkit only, no Canvas and no uGUI. The files are in `Assets/UI/UI Toolkit`:
 **Code:**
 - `Assets/Scripts/UI/Hud.cs`
 - `Assets/Scripts/UI/XPText.cs`
+- `Assets/Scripts/UI/PauseMenu.cs`
