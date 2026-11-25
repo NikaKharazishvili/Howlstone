@@ -23,8 +23,10 @@ UI Toolkit only, no Canvas and no uGUI. The files are in `Assets/UI/UI Toolkit`:
 
 ## Pause menu
 - `PauseMenu` is on the `Hud` object and uses its document: the `Pause` element (the last child, so it draws over the HUD) slides in from above with `screen` and `hidden`, as the menu screens do. Cancel (Escape) opens and closes it, and it sets `Time.timeScale` to 0 while open (UI transitions and sounds still run).
-- Entries: Resume, Save Game (`SceneManager.SaveGame`, then closes and shows "Game saved"), Load Game (`SaveFile.ReloadCurrent`, then reloads the scene; the cancel sound when there is no save), Main Menu, Exit ([Saving](Saving.md)).
+- Entries: Resume, Load Game (opens the `Slots` element: the slot list, Cancel goes back; Submit loads the slot, Delete erases it after a second press), Main Menu, Exit. There is no Save entry: saving belongs to a place in the level ([Saving](Saving.md)).
 - Up and Down select (one step for each press), Submit chooses. It uses the old Input Manager like the main menu.
+- **Pausing:** `Time.timeScale` 0 alone is not enough. The player kept reading the input: a held key started the move clip again (its footstep animation event played a sound) and jump or spin fired. So the pause also turns `Player` off (its `OnDisable` stops the input actions) and sets `AudioListener.pause` (the menu's own `AudioSource` has `ignoreListenerPause`). Anything new that reads input or plays sounds in `Update` must stop here too. Check: hold a move key, pause, and listen and watch.
+- The slot list is the template `SaveSlots.uxml` placed in both documents (`Menu.uxml`, `Hud.uxml`) as an instance named `Slots`, so each document has one element with that name.
 - `screen`, `heading`, `item` and `item.selected` are in `Common.uss`, shared with the main menu.
 
 ## XPText
@@ -35,3 +37,4 @@ UI Toolkit only, no Canvas and no uGUI. The files are in `Assets/UI/UI Toolkit`:
 - `Assets/Scripts/UI/Hud.cs`
 - `Assets/Scripts/UI/XPText.cs`
 - `Assets/Scripts/UI/PauseMenu.cs`
+- `Assets/Scripts/UI/SaveSlotList.cs`

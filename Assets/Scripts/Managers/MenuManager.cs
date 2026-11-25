@@ -7,9 +7,10 @@ using static Utils;
 [RequireComponent(typeof(UIDocument))]
 public class MenuManager : MonoBehaviour
 {
-    enum MenuScreen { Main, Account, Difficulty, Tips, Loading }
+    enum MenuScreen { Main, Account, Difficulty, Tips, Loading, Slots }
     const string HiddenClass = "hidden", PageBeforeClass = "page-before", PageAfterClass = "page-after", SelectedClass = "selected", DimClass = "dim", OffClass = "off", InstantClass = "instant";
-    const int MaxAccountNameLength = 17;
+    const int MaxAccountNameLength = 16;
+    const string LoadHeading = "Load Game", FullSlotsHeading = "All slots are full: erase one first";
     const float SubmitDelay = 0.2f, FirstRepeatDelay = 0.4f, RepeatDelay = 0.12f;
     const int KeyColumns = 7, DeleteKeyIndex = 26, SaveKeyIndex = 27, NewGameIndex = 0, LoadSavedIndex = 1, TipsIndex = 2, ExitIndex = 3;
     static readonly string[] Difficulties = { "Easy", "Medium", "Hard" };
@@ -17,8 +18,10 @@ public class MenuManager : MonoBehaviour
     [SerializeField] AudioClip selectionSound, submitSound, cancelSound, keyboardSound;
     [SerializeField] AudioSource audioSource;
     [SerializeField] UIDocument document;
-    readonly VisualElement[] screens = new VisualElement[5];
-    readonly List<Label> [] items = new List<Label>[5];
+    static readonly int ScreenCount = Enum.GetValues(typeof(MenuScreen)).Length;
+    readonly VisualElement[] screens = new VisualElement[ScreenCount];
+    readonly List<Label>[] items = new List<Label>[ScreenCount];
+    SaveSlotList slotList;
     List<VisualElement> tipPages;
     List<string> tipTitles;
     VisualElement background, loadingFill, pageLeft, pageRight;
@@ -48,6 +51,9 @@ public class MenuManager : MonoBehaviour
         items[(int)MenuScreen.Difficulty] = screens[(int)MenuScreen.Difficulty].Query<Label>(className: "item").ToList();
         items[(int)MenuScreen.Tips] = new List<Label>();
         items[(int)MenuScreen.Loading] = new List<Label>();
+        screens[(int)MenuScreen.Slots] = root.Q("Slots");
+        slotList = new SaveSlotList(screens[(int)MenuScreen.Slots]);
+        items[(int)MenuScreen.Slots] = slotList.Slots;
         tipPages = screens[(int)MenuScreen.Tips].Query(className: "tip-page").ToList();
         tipTitles = tipPages.ConvertAll(page => page.Q<Label>(className: "tip-page-title").text);
         items[(int)MenuScreen.Main][0].AddToClassList(SelectedClass);
@@ -59,6 +65,7 @@ public class MenuManager : MonoBehaviour
         if (current == MenuScreen.Loading) return;
         if (Input.GetButtonDown("Cancel") && current != MenuScreen.Main) { GoBackToMain(); return; }
         MoveByHeldKey();
+        if (current == MenuScreen.Slots && Input.GetKeyDown(KeyCode.Delete)) EraseSelectedSlot();
         bool submitted = current == MenuScreen.Account ? Input.GetButton("Submit") : Input.GetButtonDown("Submit");
         if (submitted && submitDelay == 0) Submit();
     }
@@ -87,7 +94,7 @@ public class MenuManager : MonoBehaviour
         int horizontalStep = horizontal > 0 ? 1 : horizontal < 0 ? -1 : 0, verticalStep = vertical > 0 ? -1 : vertical < 0 ? 1 : 0;
         switch (current)
         {
-            case MenuScreen.Main: case MenuScreen.Difficulty: return verticalStep;
+            case MenuScreen.Main: case MenuScreen.Difficulty: case MenuScreen.Slots: return verticalStep;
             case MenuScreen.Account: return horizontalStep != 0 ? horizontalStep : verticalStep * KeyColumns;
             case MenuScreen.Tips: return horizontalStep;
             case MenuScreen.Loading: return 0;
@@ -105,6 +112,7 @@ public class MenuManager : MonoBehaviour
         }
         else
         {
+            if (current == MenuScreen.Slots) slotList.CancelErase();
             List<Label> list = items[(int)current];
             list[selected].RemoveFromClassList(SelectedClass);
             selected = (selected + step + list.Count) % list.Count;
@@ -143,6 +151,7 @@ public class MenuManager : MonoBehaviour
             case MenuScreen.Main: SubmitMainItem(); break;
             case MenuScreen.Account: SubmitKey(); break;
             case MenuScreen.Difficulty: StartGame(); break;
+            case MenuScreen.Slots: LoadSelectedSlot(); break;
             case MenuScreen.Tips: break;
             case MenuScreen.Loading: break;
             default: throw new NotImplementedException(current.ToString());
@@ -153,19 +162,38 @@ public class MenuManager : MonoBehaviour
     {
         switch (selected)
         {
-            case NewGameIndex: audioSource.PlayOneShot(submitSound); ShowScreen(MenuScreen.Account); break;
-            case LoadSavedIndex: LoadLatestSave(); break;
+            case NewGameIndex: StartNewGameSetup(); break;
+            case LoadSavedIndex: audioSource.PlayOneShot(submitSound); ShowSlots(LoadHeading); break;
             case TipsIndex: audioSource.PlayOneShot(submitSound); ShowScreen(MenuScreen.Tips); break;
             case ExitIndex: QuitGame(); break;
             default: throw new NotImplementedException(selected.ToString());
         }
     }
 
-    void LoadLatestSave()
+    void StartNewGameSetup()
     {
-        if (!SaveFile.LoadLatest()) { audioSource.PlayOneShot(cancelSound); return; }
+        if (SaveFile.FirstEmptySlot() < 0) { audioSource.PlayOneShot(cancelSound); ShowSlots(FullSlotsHeading); return; }
+        audioSource.PlayOneShot(submitSound);
+        ShowScreen(MenuScreen.Account);
+    }
+
+    void ShowSlots(string heading)
+    {
+        slotList.Show(heading);
+        ShowScreen(MenuScreen.Slots);
+    }
+
+    void LoadSelectedSlot()
+    {
+        if (!SaveFile.Load(selected)) { audioSource.PlayOneShot(cancelSound); return; }
         audioSource.PlayOneShot(submitSound);
         LoadSavedScene();
+    }
+
+    void EraseSelectedSlot()
+    {
+        slotList.PressErase(selected);
+        audioSource.PlayOneShot(cancelSound);
     }
 
     void SubmitKey()
@@ -191,7 +219,7 @@ public class MenuManager : MonoBehaviour
 
     void StartGame()
     {
-        SaveFile.StartNew(accountName.text, Difficulties[selected]);
+        SaveFile.StartNew(SaveFile.FirstEmptySlot(), accountName.text, Difficulties[selected]);
         audioSource.PlayOneShot(selectionSound);
         LoadSavedScene();
     }

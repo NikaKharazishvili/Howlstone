@@ -32,7 +32,7 @@ public class SceneManager : MonoBehaviour
     void Awake()
     {
         Instance = this;
-        if (SaveFile.Current == null && !SaveFile.LoadLatest()) SaveFile.StartNew(TestAccount, TestDifficulty);
+        if (SaveFile.Current == null && !SaveFile.LoadFirstFilledSlot()) SaveFile.StartNew(0, TestAccount, TestDifficulty);
         Player.SM = this;
         Cam.Player = Player;
         ShurikenProjectile.SM = this;

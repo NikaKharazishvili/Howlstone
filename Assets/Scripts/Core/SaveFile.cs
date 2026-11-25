@@ -29,56 +29,67 @@ public class SaveData
 
 public static class SaveFile
 {
-    public const int Version = 1;
+    public const int Version = 1, SlotCount = 5;
     public const string FirstScene = "Level1";
-    const string FolderName = "Saves", Extension = ".json", TemporaryExtension = ".tmp";
+    const string FolderName = "Saves", SlotName = "Slot", Extension = ".json", TemporaryExtension = ".tmp";
 
     public static SaveData Current { get; private set; }
+    static int currentSlot;
 
     static string Folder => Path.Combine(Directory.GetParent(Application.dataPath).FullName, FolderName);
 
-    public static bool AnySaveExists => Directory.Exists(Folder) && Directory.GetFiles(Folder, "*" + Extension).Length > 0;
+    static string PathOf(int slot) => Path.Combine(Folder, SlotName + (slot + 1) + Extension);
 
-    public static void StartNew(string account, string difficulty)
+    // Null for an empty slot and for a file that cannot be read
+    public static SaveData Read(int slot)
+    {
+        string path = PathOf(slot);
+        if (!File.Exists(path)) return null;
+        SaveData data;
+        try { data = JsonUtility.FromJson<SaveData>(File.ReadAllText(path)); }
+        catch (ArgumentException) { return null; }
+        return data != null && data.version <= Version && !string.IsNullOrEmpty(data.account) ? data : null;
+    }
+
+    public static int FirstEmptySlot()
+    {
+        for (int slot = 0; slot < SlotCount; slot++)
+            if (Read(slot) == null) return slot;
+        return -1;
+    }
+
+    public static void StartNew(int slot, string account, string difficulty)
     {
         Current = new SaveData { account = account, difficulty = difficulty };
+        currentSlot = slot;
         Write();
     }
 
-    public static bool LoadLatest()
+    public static bool Load(int slot)
     {
-        if (!Directory.Exists(Folder)) return false;
-        FileInfo[] files = new DirectoryInfo(Folder).GetFiles("*" + Extension);
-        Array.Sort(files, (a, b) => b.LastWriteTimeUtc.CompareTo(a.LastWriteTimeUtc));
-        foreach (FileInfo file in files)
-            if (TryRead(file.FullName, out SaveData data)) { Current = data; return true; }
-        return false;
-    }
-
-    public static bool ReloadCurrent()
-    {
-        if (!TryRead(PathOf(Current.account), out SaveData data)) return false;
+        SaveData data = Read(slot);
+        if (data == null) return false;
         Current = data;
+        currentSlot = slot;
         return true;
     }
 
-    static string PathOf(string account) => Path.Combine(Folder, account + Extension);
+    public static bool LoadFirstFilledSlot()
+    {
+        for (int slot = 0; slot < SlotCount; slot++)
+            if (Load(slot)) return true;
+        return false;
+    }
+
+    public static void Delete(int slot) => File.Delete(PathOf(slot));
 
     public static void Write()
     {
         Directory.CreateDirectory(Folder);
-        string path = PathOf(Current.account);
+        string path = PathOf(currentSlot);
         string temporaryPath = Path.ChangeExtension(path, TemporaryExtension);
         File.WriteAllText(temporaryPath, JsonUtility.ToJson(Current, true));
         if (File.Exists(path)) File.Replace(temporaryPath, path, null);
         else File.Move(temporaryPath, path);
-    }
-
-    static bool TryRead(string path, out SaveData data)
-    {
-        data = null;
-        try { data = JsonUtility.FromJson<SaveData>(File.ReadAllText(path)); }
-        catch (ArgumentException) { return false; }
-        return data != null && data.version <= Version && !string.IsNullOrEmpty(data.account);
     }
 }

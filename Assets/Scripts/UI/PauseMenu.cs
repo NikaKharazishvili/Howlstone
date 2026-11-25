@@ -7,29 +7,36 @@ using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 
 public class PauseMenu : MonoBehaviour
 {
-    const string HiddenClass = "hidden", SelectedClass = "selected", MenuScene = "Menu";
-    const int ResumeIndex = 0, SaveIndex = 1, LoadIndex = 2, MainMenuIndex = 3, ExitIndex = 4;
+    const string HiddenClass = "hidden", SelectedClass = "selected", MenuScene = "Menu", LoadHeading = "Load Game";
+    const int ResumeIndex = 0, LoadIndex = 1, MainMenuIndex = 2, ExitIndex = 3;
 
     [SerializeField] UIDocument document;
     [SerializeField] AudioSource audioSource;
     [SerializeField] AudioClip selectionSound, submitSound, cancelSound;
-    VisualElement pause;
-    List<Label> items;
-    bool isPaused;
+    VisualElement pause, slots;
+    SaveSlotList slotList;
+    List<Label> pauseItems;
+    bool isPaused, isShowingSlots;
     int selected, heldStep;
+
+    List<Label> CurrentItems => isShowingSlots ? slotList.Slots : pauseItems;
 
     void Start()
     {
-        pause = document.rootVisualElement.Q("Pause");
-        items = pause.Query<Label>(className: "item").ToList();
-        items[0].AddToClassList(SelectedClass);
+        VisualElement root = document.rootVisualElement;
+        pause = root.Q("Pause");
+        slots = root.Q("Slots");
+        slotList = new SaveSlotList(slots);
+        pauseItems = pause.Query<Label>(className: "item").ToList();
+        pauseItems[0].AddToClassList(SelectedClass);
     }
 
     void Update()
     {
-        if (Input.GetButtonDown("Cancel")) { SetPaused(!isPaused); return; }
+        if (Input.GetButtonDown("Cancel")) { if (isShowingSlots) ShowSlots(false); else SetPaused(!isPaused); return; }
         if (!isPaused) return;
         MoveSelection();
+        if (isShowingSlots && Input.GetKeyDown(KeyCode.Delete)) EraseSelectedSlot();
         if (Input.GetButtonDown("Submit")) Submit();
     }
 
@@ -37,53 +44,72 @@ public class PauseMenu : MonoBehaviour
     {
         float vertical = Input.GetAxisRaw("Vertical");
         int step = vertical > 0 ? -1 : vertical < 0 ? 1 : 0;
-        if (step != 0 && step != heldStep) Select((selected + step + items.Count) % items.Count);
+        if (step != 0 && step != heldStep)
+        {
+            if (isShowingSlots) slotList.CancelErase();
+            Select((selected + step + CurrentItems.Count) % CurrentItems.Count);
+            audioSource.PlayOneShot(selectionSound);
+        }
         heldStep = step;
     }
 
     void Select(int index)
     {
-        items[selected].RemoveFromClassList(SelectedClass);
+        CurrentItems[selected].RemoveFromClassList(SelectedClass);
         selected = index;
-        items[selected].AddToClassList(SelectedClass);
-        audioSource.PlayOneShot(selectionSound);
+        CurrentItems[selected].AddToClassList(SelectedClass);
     }
 
     void SetPaused(bool paused)
     {
         isPaused = paused;
-        Time.timeScale = paused ? 0 : 1;
+        SetFrozen(paused);
         pause.EnableInClassList(HiddenClass, !paused);
-        items[selected].RemoveFromClassList(SelectedClass);
-        selected = 0;
-        items[selected].AddToClassList(SelectedClass);
+        Select(0);
         audioSource.PlayOneShot(paused ? submitSound : cancelSound);
+    }
+
+    void SetFrozen(bool frozen)
+    {
+        Time.timeScale = frozen ? 0 : 1;
+        AudioListener.pause = frozen;
+        SceneManager.Instance.Player.enabled = !frozen;
+    }
+
+    void ShowSlots(bool shown)
+    {
+        if (shown) slotList.Show(LoadHeading);
+        CurrentItems[selected].RemoveFromClassList(SelectedClass);
+        isShowingSlots = shown;
+        selected = 0;
+        CurrentItems[selected].AddToClassList(SelectedClass);
+        slots.EnableInClassList(HiddenClass, !shown);
+        pause.EnableInClassList(HiddenClass, shown);
     }
 
     void Submit()
     {
+        if (isShowingSlots) { LoadSelectedSlot(); return; }
         switch (selected)
         {
             case ResumeIndex: SetPaused(false); break;
-            case SaveIndex: SaveGame(); break;
-            case LoadIndex: LoadGame(); break;
-            case MainMenuIndex: Time.timeScale = 1; UnitySceneManager.LoadScene(MenuScene); break;
+            case LoadIndex: audioSource.PlayOneShot(submitSound); ShowSlots(true); break;
+            case MainMenuIndex: SetFrozen(false); UnitySceneManager.LoadScene(MenuScene); break;
             case ExitIndex: QuitGame(); break;
             default: throw new NotImplementedException(selected.ToString());
         }
     }
 
-    void SaveGame()
+    void LoadSelectedSlot()
     {
-        SceneManager.Instance.SaveGame();
-        SetPaused(false);
-        SceneManager.Instance.Hud.ShowEvent("Game saved", Color.green);
+        if (!SaveFile.Load(selected)) { audioSource.PlayOneShot(cancelSound); return; }
+        SetFrozen(false);
+        UnitySceneManager.LoadScene(SaveFile.Current.lastScene);
     }
 
-    void LoadGame()
+    void EraseSelectedSlot()
     {
-        if (!SaveFile.ReloadCurrent()) { audioSource.PlayOneShot(cancelSound); return; }
-        Time.timeScale = 1;
-        UnitySceneManager.LoadScene(SaveFile.Current.lastScene);
+        slotList.PressErase(selected);
+        audioSource.PlayOneShot(cancelSound);
     }
 }
