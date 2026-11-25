@@ -7,7 +7,7 @@ using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 
 public class PauseMenu : MonoBehaviour
 {
-    const string HiddenClass = "hidden", SelectedClass = "selected", MenuScene = "Menu", LoadHeading = "Load Game";
+    const string HiddenClass = "hidden", SelectedClass = "selected", MenuScene = "Menu";
     const int ResumeIndex = 0, LoadIndex = 1, MainMenuIndex = 2, ExitIndex = 3;
 
     [SerializeField] UIDocument document;
@@ -37,7 +37,6 @@ public class PauseMenu : MonoBehaviour
         if (Input.GetButtonDown("Cancel")) { if (isShowingSlots) ShowSlots(false); else SetPaused(!isPaused); return; }
         if (!isPaused) return;
         MoveSelection();
-        if (isShowingSlots && Input.GetKeyDown(KeyCode.Delete)) EraseSelectedSlot();
         if (Input.GetButtonDown("Submit")) Submit();
     }
 
@@ -47,7 +46,6 @@ public class PauseMenu : MonoBehaviour
         int step = vertical > 0 ? -1 : vertical < 0 ? 1 : 0;
         if (step != 0 && step != heldStep)
         {
-            if (isShowingSlots) slotList.CancelErase();
             Select((selected + step + CurrentItems.Count) % CurrentItems.Count);
             audioSource.PlayOneShot(selectionSound);
         }
@@ -79,7 +77,7 @@ public class PauseMenu : MonoBehaviour
 
     void ShowSlots(bool shown)
     {
-        if (shown) slotList.Show(LoadHeading);
+        if (shown) slotList.ShowForLoad();
         CurrentItems[selected].RemoveFromClassList(SelectedClass);
         isShowingSlots = shown;
         selected = 0;
@@ -106,11 +104,5 @@ public class PauseMenu : MonoBehaviour
         if (!SaveFile.Load(selected)) { audioSource.PlayOneShot(cancelSound); return; }
         SetFrozen(false);
         UnitySceneManager.LoadScene(SaveFile.Current.lastScene);
-    }
-
-    void EraseSelectedSlot()
-    {
-        slotList.PressErase(selected);
-        audioSource.PlayOneShot(cancelSound);
     }
 }

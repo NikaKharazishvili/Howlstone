@@ -10,7 +10,6 @@ public class MenuManager : MonoBehaviour
     enum MenuScreen { Main, Account, Difficulty, Tips, Loading, Slots }
     const string HiddenClass = "hidden", PageBeforeClass = "page-before", PageAfterClass = "page-after", SelectedClass = "selected", DimClass = "dim", OffClass = "off", InstantClass = "instant";
     const int MaxAccountNameLength = 16;
-    const string LoadHeading = "Load Game", FullSlotsHeading = "All slots are full: erase one first";
     const float SubmitDelay = 0.2f, FirstRepeatDelay = 0.4f, RepeatDelay = 0.12f;
     const int KeyColumns = 7, DeleteKeyIndex = 26, SaveKeyIndex = 27, NewGameIndex = 0, LoadSavedIndex = 1, TipsIndex = 2, ExitIndex = 3;
     static readonly string[] Difficulties = { "Easy", "Medium", "Hard" };
@@ -27,6 +26,8 @@ public class MenuManager : MonoBehaviour
     VisualElement background, loadingFill, pageLeft, pageRight;
     Label accountName, loadingText, pageNumber, tipTitle;
     MenuScreen current;
+    string chosenDifficulty;
+    bool isChoosingNewGameSlot;
     int selected, tipPage, heldStep, lastLoadingPercent = -1;
     float submitDelay, repeatTimer;
 
@@ -65,7 +66,6 @@ public class MenuManager : MonoBehaviour
         if (current == MenuScreen.Loading) return;
         if (Input.GetButtonDown("Cancel") && current != MenuScreen.Main) { GoBackToMain(); return; }
         MoveByHeldKey();
-        if (current == MenuScreen.Slots && Input.GetKeyDown(KeyCode.Delete)) EraseSelectedSlot();
         bool submitted = current == MenuScreen.Account ? Input.GetButton("Submit") : Input.GetButtonDown("Submit");
         if (submitted && submitDelay == 0) Submit();
     }
@@ -112,7 +112,7 @@ public class MenuManager : MonoBehaviour
         }
         else
         {
-            if (current == MenuScreen.Slots) slotList.CancelErase();
+            if (current == MenuScreen.Slots) slotList.CancelOverwrite();
             List<Label> list = items[(int)current];
             list[selected].RemoveFromClassList(SelectedClass);
             selected = (selected + step + list.Count) % list.Count;
@@ -150,8 +150,8 @@ public class MenuManager : MonoBehaviour
         {
             case MenuScreen.Main: SubmitMainItem(); break;
             case MenuScreen.Account: SubmitKey(); break;
-            case MenuScreen.Difficulty: StartGame(); break;
-            case MenuScreen.Slots: LoadSelectedSlot(); break;
+            case MenuScreen.Difficulty: ChooseDifficulty(); break;
+            case MenuScreen.Slots: if (isChoosingNewGameSlot) StartGame(); else LoadSelectedSlot(); break;
             case MenuScreen.Tips: break;
             case MenuScreen.Loading: break;
             default: throw new NotImplementedException(current.ToString());
@@ -162,24 +162,25 @@ public class MenuManager : MonoBehaviour
     {
         switch (selected)
         {
-            case NewGameIndex: StartNewGameSetup(); break;
-            case LoadSavedIndex: audioSource.PlayOneShot(submitSound); ShowSlots(LoadHeading); break;
+            case NewGameIndex: audioSource.PlayOneShot(submitSound); ShowScreen(MenuScreen.Account); break;
+            case LoadSavedIndex: audioSource.PlayOneShot(submitSound); ShowSlots(false); break;
             case TipsIndex: audioSource.PlayOneShot(submitSound); ShowScreen(MenuScreen.Tips); break;
             case ExitIndex: QuitGame(); break;
             default: throw new NotImplementedException(selected.ToString());
         }
     }
 
-    void StartNewGameSetup()
+    void ChooseDifficulty()
     {
-        if (SaveFile.FirstEmptySlot() < 0) { audioSource.PlayOneShot(cancelSound); ShowSlots(FullSlotsHeading); return; }
+        chosenDifficulty = Difficulties[selected];
         audioSource.PlayOneShot(submitSound);
-        ShowScreen(MenuScreen.Account);
+        ShowSlots(true);
     }
 
-    void ShowSlots(string heading)
+    void ShowSlots(bool forNewGame)
     {
-        slotList.Show(heading);
+        isChoosingNewGameSlot = forNewGame;
+        if (forNewGame) slotList.ShowForNewGame(); else slotList.ShowForLoad();
         ShowScreen(MenuScreen.Slots);
     }
 
@@ -188,12 +189,6 @@ public class MenuManager : MonoBehaviour
         if (!SaveFile.Load(selected)) { audioSource.PlayOneShot(cancelSound); return; }
         audioSource.PlayOneShot(submitSound);
         LoadSavedScene();
-    }
-
-    void EraseSelectedSlot()
-    {
-        slotList.PressErase(selected);
-        audioSource.PlayOneShot(cancelSound);
     }
 
     void SubmitKey()
@@ -219,7 +214,8 @@ public class MenuManager : MonoBehaviour
 
     void StartGame()
     {
-        SaveFile.StartNew(SaveFile.FirstEmptySlot(), accountName.text, Difficulties[selected]);
+        if (!slotList.ConfirmOverwrite(selected)) { audioSource.PlayOneShot(cancelSound); return; }
+        SaveFile.StartNew(selected, accountName.text, chosenDifficulty);
         audioSource.PlayOneShot(selectionSound);
         LoadSavedScene();
     }

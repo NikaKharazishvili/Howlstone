@@ -20,7 +20,7 @@ Not done yet. The aim is a small, really good, playable game ([AboutTheGame](Abo
 - [ ] Gamepad: every action and every menu works with a gamepad as well as the keyboard.
 
 ## Step 2: systems
-- [x] A real saving system ([Saving](Saving.md)): `SaveFile`, 5 slots as versioned files outside `Assets`, a slot list to load and erase in the menu and the pause menu. Left: a save point in the level that calls `SceneManager.SaveGame` (the player reaches it and uses it; nothing saves progress yet), breakables, chests, the progress percent, health and upgrades, and a list of accounts.
+- [x] A real saving system ([Saving](Saving.md)): `SaveFile`, 5 slots as versioned files outside `Assets`, a slot list to load from (menu and pause menu) and to choose where a new game goes (overwrite needs a second Enter; no delete). Left: a save point in the level that calls `SceneManager.SaveGame` (the player reaches it and uses it; nothing saves progress yet), breakables, chests, the progress percent, health and upgrades, and a list of accounts.
 - [ ] Level flow: progress percent of a level, the next level unlocks at a set percent (a constant), going back to earlier levels, a level select or a path in the menu.
 - [ ] Automatic upgrades: a table of what each level up gives, and the pause menu page that shows it.
 - [ ] Rewards: drops from enemies, chests and breakables.

@@ -51,13 +51,6 @@ public static class SaveFile
         return data != null && data.version <= Version && !string.IsNullOrEmpty(data.account) ? data : null;
     }
 
-    public static int FirstEmptySlot()
-    {
-        for (int slot = 0; slot < SlotCount; slot++)
-            if (Read(slot) == null) return slot;
-        return -1;
-    }
-
     public static void StartNew(int slot, string account, string difficulty)
     {
         Current = new SaveData { account = account, difficulty = difficulty };
@@ -80,8 +73,6 @@ public static class SaveFile
             if (Load(slot)) return true;
         return false;
     }
-
-    public static void Delete(int slot) => File.Delete(PathOf(slot));
 
     public static void Write()
     {
