@@ -14,6 +14,14 @@ How to write a prompt for a picture generator (UI icons, frames, textures). Read
 - Anything the game draws itself (a letter on a key, a number, a label) is left empty in the picture: the game puts its text on it, so one picture works for all.
 - A frame or bar that must stretch is described as 9-slice friendly: ornate corners, straight repeating edges, a plain flat center.
 
+## What gives the game's look (picked by the owner)
+- The dark stone version with gold trim is the look to ask for: smooth clean painted shapes, soft rounded bevels, simple clear highlights, a clean smooth gold gradient, dark stone body with a soft inner glow, strong contrast. Say what to avoid: scratches, grain, noise, dirt, realistic metal texture, thick outlines. The steel row is made but not used.
+- Ask for 3 separate images (keys, gamepad buttons, frames), each with a true alpha channel (a drawn checkerboard or grey background is a failure), one piece centered in each cell, equal size in a row.
+- Keys: empty square, empty wide (twice as wide as tall), square with a bright orange glowing outline for the selected one. The generator draws arrows badly, so arrows are never asked for: the game writes `<` and `>` on an empty key.
+- Gamepad: round dark buttons with a glowing symbol (a letter-X shape made of two diagonal strokes, a ring, a square, a triangle; say "not a plus sign") and one long empty shoulder button.
+- Frames: a wide banner with pointed ornate ends, a thin table header, a large square panel, a thin row, a selection frame with a soft orange glow, each 9-slice friendly.
+- The generator's size is never exact: after the cut each picture is resized to a width and height that are multiples of 4 (the texture compressor needs it) and the slice borders are checked against the new size.
+
 ## After the picture
 - The owner saves it with ChatGPT's download button as a PNG and gives its path: a paste or a screenshot loses the transparent background.
 - Never set a picture in the game before the owner picks it. A picked picture is cut to what it shows. A frame is imported with its slice borders set (UI Toolkit `-unity-slice-*`).

@@ -16,7 +16,7 @@ Not done yet. The aim is a small, really good, playable game ([AboutTheGame](Abo
 - [ ] Decide the draw method for the environment by measuring clusters against static batching plus LOD groups ([Rendering](Rendering.md)); write the numbers in [Optimizations](Optimizations.md).
 - [ ] Rebuild Level1's ground with the owner's ground tool instead of Unity Terrain, and place props with its prefab tool; then remove the Terrain data and the unused terrain textures.
 - [x] The HUD and the menu are in UI Toolkit and the Canvas versions are deleted ([UI](UI.md)). Left: gamepad navigation in the menu (it still uses the old Input Manager), the mouse, and a check of the layout at other screen shapes.
-- [ ] Most generated UI images in `Assets/UI/Icons` and `Assets/UI/Sprites` are not a multiple of 4 in size, so they stay uncompressed: resize them (a sliced frame needs its `-unity-slice-*` values changed with it).
+- [ ] The HUD icons (coin, kill, box, life) are not a multiple of 4 in size, so they stay uncompressed: resize them. `Divider`, `Life`, `FramePanel`, `FrameRow` and `FrameSelection` are not used by any USS yet.
 - [ ] Gamepad: every action and every menu works with a gamepad as well as the keyboard.
 
 ## Step 2: systems
