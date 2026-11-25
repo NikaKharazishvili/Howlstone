@@ -9,7 +9,7 @@ How to write a prompt for a picture generator (UI icons, frames, textures). Read
 
 ## The prompt
 - One block, ready to paste, for exactly what the owner named and nothing else.
-- Each image is a grid with one thing per column and two different ideas per column (2 rows), on a transparent background. ChatGPT makes about 10 pictures in one image, so a prompt has at most 5 things; more things are more prompts, each one complete on its own (repeat the style text in each).
+- Each image is a grid with one thing per column and two different ideas per column (2 rows), on a transparent background. ChatGPT makes about 10 pictures in one image, so an image has at most 5 things. The owner always gets ONE text to paste, never several: when there are more than 5 things, that one text shares the style once and asks for several images one after another in the same answer, without questions.
 - Say what not to draw (text, letters, logos, people, hands, frames around the pictures, shadows, a checkerboard) and what to draw alone and centered. Use words the generator can not mix up.
 - Anything the game draws itself (a letter on a key, a number, a label) is left empty in the picture: the game puts its text on it, so one picture works for all.
 - A frame or bar that must stretch is described as 9-slice friendly: ornate corners, straight repeating edges, a plain flat center.
