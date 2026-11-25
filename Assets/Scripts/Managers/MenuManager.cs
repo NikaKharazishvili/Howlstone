@@ -8,7 +8,8 @@ using static Utils;
 public class MenuManager : MonoBehaviour
 {
     enum MenuScreen { Main, Account, Difficulty, Tips, Loading }
-    const string HiddenClass = "hidden", PageBeforeClass = "page-before", PageAfterClass = "page-after", SelectedClass = "selected", DimClass = "dim", OffClass = "off";
+    const string HiddenClass = "hidden", PageBeforeClass = "page-before", PageAfterClass = "page-after", SelectedClass = "selected", DimClass = "dim", OffClass = "off", InstantClass = "instant";
+    const int MaxAccountNameLength = 14;
     const float SubmitDelay = 0.2f, FirstRepeatDelay = 0.4f, RepeatDelay = 0.12f;
     const int KeyColumns = 7, DeleteKeyIndex = 26, SaveKeyIndex = 27, NewGameIndex = 0, LoadSavedIndex = 1, TipsIndex = 2, ExitIndex = 3;
     static readonly string[] Difficulties = { "Easy", "Medium", "Hard" };
@@ -112,6 +113,14 @@ public class MenuManager : MonoBehaviour
         audioSource.PlayOneShot(selectionSound);
     }
 
+    void ShowFirstTipPageWithoutSliding()
+    {
+        VisualElement tips = screens[(int)MenuScreen.Tips];
+        tips.AddToClassList(InstantClass);
+        ShowTipPage(0);
+        tips.schedule.Execute(() => tips.RemoveFromClassList(InstantClass)).ExecuteLater(60);
+    }
+
     void ShowTipPage(int page)
     {
         tipPage = page;
@@ -165,11 +174,12 @@ public class MenuManager : MonoBehaviour
             audioSource.PlayOneShot(submitSound);
             ShowScreen(MenuScreen.Difficulty);
         }
-        else
+        else if (accountName.text.Length < MaxAccountNameLength)
         {
             audioSource.PlayOneShot(keyboardSound);
             accountName.text += items[(int)MenuScreen.Account][selected].text;
         }
+        else audioSource.PlayOneShot(cancelSound);
     }
 
     void StartGame()
@@ -198,7 +208,7 @@ public class MenuManager : MonoBehaviour
         selected = 0;
         submitDelay = SubmitDelay;
         heldStep = 0;
-        if (next == MenuScreen.Tips) ShowTipPage(0);
+        if (next == MenuScreen.Tips) ShowFirstTipPageWithoutSliding();
         if (items[(int)next].Count > 0) items[(int)next][0].AddToClassList(SelectedClass);
     }
 

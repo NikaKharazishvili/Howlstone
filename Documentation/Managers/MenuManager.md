@@ -11,6 +11,9 @@ The `Menu` scene's manager: a keyboard-only menu in UI Toolkit (`Assets/UI/UI To
 - After the difficulty the account name and difficulty are saved ([Saving](../Saving.md)) and `Level1` loads with a loading bar (`Utils.LoadSceneAsync` gives the progress to `ShowLoadingProgress`, which updates the text only when the percent changes).
 - It uses the old Input Manager (`Input.GetAxisRaw`, `GetButton`), while the game itself uses the Input System. The project accepts both. No `EventSystem` is needed: nothing is clicked.
 
+- The account name is at most `MaxAccountNameLength` letters, so it always fits its frame (the widest letter, W, measured).
+- **Bug, cause and check:** leaving Tips from page 2 or 3 and entering it again made the pages slide across the screen over the main menu, because the first page was reset with the 0.5 s transition. `ShowFirstTipPageWithoutSliding` puts the class `instant` (no transition) on the Tips screen while it resets the pages. Check: go to page 3, leave, enter again, and take a screenshot right away.
+
 ## Known problems (see [TODO](../TODO.md))
 - Load Saved only plays the cancel sound.
 - The Exit entry works in the editor too (stops Play).
