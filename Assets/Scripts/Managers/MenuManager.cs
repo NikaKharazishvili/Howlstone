@@ -108,7 +108,6 @@ public class MenuManager : MonoBehaviour
         }
         else
         {
-            if (current == MenuScreen.Slots) slotList.CancelOverwrite();
             List<Label> list = items[(int)current];
             list[selected].RemoveFromClassList(SelectedClass);
             selected = (selected + step + list.Count) % list.Count;
@@ -167,7 +166,6 @@ public class MenuManager : MonoBehaviour
 
     void ChooseNewGameSlot()
     {
-        if (!slotList.ConfirmOverwrite(selected)) { audioSource.PlayOneShot(cancelSound); return; }
         chosenSlot = selected;
         audioSource.PlayOneShot(submitSound);
         ShowScreen(MenuScreen.Account);
