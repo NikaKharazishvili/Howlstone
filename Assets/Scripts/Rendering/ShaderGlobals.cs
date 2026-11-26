@@ -24,7 +24,7 @@ public class ShaderGlobals
     [SerializeField, Range(0, 1)] float toonAmount = 0.6f;
     [SerializeField] float toonDimming = 0.6f;
     [SerializeField, Range(0, 2)] float toonBandingBias = 2;
-    [SerializeField, Range(0.1f, 1)] float toonRimOffset = 0.3f;
+    [SerializeField, Range(0.1f, 1)] float toonRimOffset = 0.4f;
     [SerializeField] float toonRimSoftness = 0.001f;
     [SerializeField] float textureSharpening = 1, textureSharpeningBlurMips = 2, heightGradient = 0.4f;
     [SerializeField, Min(0.1f)] float footPushHeight = 0.4f;
