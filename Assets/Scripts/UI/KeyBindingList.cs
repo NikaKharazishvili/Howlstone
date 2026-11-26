@@ -117,6 +117,7 @@ public class KeyBindingList
             Label label = Cells[cell];
             ClearCellLook(label);
             label.EnableInClassList(DuplicateClass, IsKeyUsedTwice(cell));
+            label.MarkDirtyRepaint();
             if (device == Keyboard)
             {
                 label.text = readableName;
