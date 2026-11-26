@@ -21,7 +21,7 @@ What it costs (measured in the editor, a 96 m ground):
 - A LevelShots picture (1280 x 1080) is about 1800 tokens, a LevelCheck report under 300. The check found floating trees that nine pictures had not shown.
 
 ## Caves and overhangs
-No tool or pack is needed. The ground is one height per spot and cannot hang over itself, so a script makes a roof mesh over it:
+No tool or pack is needed. Digger (a voxel digging pack) works only on Unity's Terrain, so it cannot dig our ground: it is not used (measured on a 64 m test Terrain: a 48 m tunnel in 195 ms, 4,064 triangles, 10.5 MB of data files). The ground is one height per spot and cannot hang over itself, so a script makes a roof mesh over it:
 - A trench through the hill, a little wider than the cave.
 - The roof: a rough arch inside with a rock material and its own UVs, the hill's own height outside with the ground material (UV: position divided by the ground's size), closed at both mouths.
 - A `MeshCollider` on a layer other than `Ground`, so the floor under it stays the ground.

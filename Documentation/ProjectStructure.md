@@ -4,7 +4,7 @@ The layout and naming rules of the project (the same style as the owner's other 
 
 ## Folders (`Assets/`)
 - `Audio/`: by who makes the sound: `Music`, `Player`, `Enemies`, `Weapons`, `Shuriken`, `Footsteps`, `Events`, `UI`.
-- `Scenes/`: `Menu`, `Level1` and the `Level1` folder with the scene's own data.
+- `Scenes/`: `Menu`, `Level1` and the `Level1` folder with the scene's own data. `Tests` holds test scenes, each with its data folder.
 - `Scripts/`: `Core` (constants, helpers, `ClipAnimator`), `Gameplay` (`Player`, `Enemies`, `Camera`, `Proximity`), `Managers`, `Rendering`, `UI`. A script class with a doc is listed in that doc under `Code:`.
 - `Objects/`: everything in the world (models, textures, materials, prefabs, animation clips) by kind, one `Animations` folder inside the kind that uses the clips (clips only, no controllers). `Characters` (`Player`, `Enemies`, `KayKitSkeletons`), `Environment` (`Buildings`, `Nature`, `Structures`, `KayKitDecorations`, `TreePack`, `PolyverseSkies`), `Ground` (`Textures`, `Layers`, the Terrain's material), `Pickups`, `Projectiles`, `Props`, `Weapons`. `SceneManager.prefab`, what every level shares, lies in `Objects` itself. A pack we did not make keeps its own folder inside its kind, untouched. See [ThirdPartyAssets](ThirdPartyAssets.md).
 - `UI/`: HUD and menu art (one file each: the HUD sprites, keys, gamepad buttons, frames and bars), `UI Toolkit` (UXML, USS, theme and panel settings, one folder for each part: [UI](UI.md)), and the UI prefabs.
