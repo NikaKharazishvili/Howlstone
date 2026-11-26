@@ -27,8 +27,9 @@ What it costs (measured in the editor, a 96 m ground):
 
 ## Caves and overhangs
 Digger (a voxel digging pack) works only on Unity's Terrain, so it cannot dig our ground: it is not used (measured on a 64 m test Terrain: a 48 m tunnel in 195 ms, 4,064 triangles, 10.5 MB of data files). A tunnel is one command of the environment tools: a trench in the ground with a roof mesh over it.
-- The roof's collider is on a layer other than `Ground`, so the floor under it stays the ground.
-- Tested: the NavMesh path goes through. Not tested in Play: the camera and `Occludable` inside.
+- The roof's collider is on the `CameraBlock` layer, never on `Ground`: the floor under it stays the ground, and the [camera](Camera.md) stays inside.
+- The roof needs no `Occludable`.
+- Tested in Play: walking through, over the hill above it, and turning the camera inside. The NavMesh path goes through.
 
 ## Layout
 - A start, one painted path that leads the eye, a few open spaces joined by it, and one landmark seen from the start.
@@ -50,6 +51,7 @@ Digger (a voxel digging pack) works only on Unity's Terrain, so it cannot dig ou
 - Ground the player must walk on is gentler than `MaxClimbAngle`, ground that closes the area is steeper.
 - Objects that never move are children of the object `BlobShadows` links as `environment` ([BlobShadows](BlobShadows.md)). Coins, enemies and breakables are children of their counting parents ([SceneManager](Managers/SceneManager.md)).
 - Water has a trigger with the water tag, or it does not slow the player.
+- Walls and roofs the camera must stay in front of are on the `CameraBlock` layer, with a back-culled material.
 - Things on the water use the material `FloatingPlants` (wind preset Floating of the `Universal` shader), which rides the water's wave. Its flow speed and waves must equal the water material's.
 
 ## Mistakes to avoid (found in the test area)

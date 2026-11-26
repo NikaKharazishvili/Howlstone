@@ -6,8 +6,11 @@ public class Cam : MonoBehaviour
 {
     public static Player Player;
 
-    // Occlusion things
-    [SerializeField] LayerMask occludableLayer;
+    [SerializeField] LayerMask occludableLayer, blockingLayer;
+
+    // The room the camera needs when ground or a wall stops it, and how fast it moves back out
+    const float CameraRadius = 0.3f, CameraReturnSpeed = 5;
+    float distance = CameraZoom;
 
     readonly Dictionary<int, Occludable> occluderCache = new();
     HashSet<Occludable> hiddenLastFrame = new();
@@ -15,9 +18,8 @@ public class Cam : MonoBehaviour
 
     void Start()
     {
-        // Sets camera's initial pitch (up-down tilt) and positions it behind and above the Player
         transform.rotation = Quaternion.Euler(CameraPitch, transform.rotation.eulerAngles.y, 0);
-        transform.position = Player.transform.position - transform.forward * CameraZoom + Vector3.up * CameraUpPosition;
+        FollowPlayer();
     }
 
     void LateUpdate()
@@ -27,10 +29,14 @@ public class Cam : MonoBehaviour
         HandleOcclusion();
     }
 
-    // Keep camera positioned behind and above the Player
-    void FollowPlayer() => transform.position = Player.transform.position - transform.forward * CameraZoom + Vector3.up * CameraUpPosition;
+    void FollowPlayer()
+    {
+        Vector3 pivot = Player.transform.position + Vector3.up * CameraUpPosition;
+        distance = Mathf.Lerp(distance, CameraZoom, Time.deltaTime * CameraReturnSpeed);
+        if (Physics.SphereCast(pivot, CameraRadius, -transform.forward, out RaycastHit wall, distance, blockingLayer, QueryTriggerInteraction.Ignore)) distance = wall.distance;
+        transform.position = pivot - transform.forward * distance;
+    }
 
-    // Rotate camera with rotation hotkeys. Also slowly follow Player's horizontal movement
     void HandleRotation()
     {
         if (!Player.IsAlive) return;
@@ -51,7 +57,7 @@ public class Cam : MonoBehaviour
         hitThisFrame.Clear();
         CastAndCollectHits();
         RestoreNonHitObjects();
-        (hiddenLastFrame, hitThisFrame) = (hitThisFrame, hiddenLastFrame); // swap, no alloc
+        (hiddenLastFrame, hitThisFrame) = (hitThisFrame, hiddenLastFrame);
     }
 
     void CastAndCollectHits()

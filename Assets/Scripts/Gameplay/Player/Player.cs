@@ -51,7 +51,7 @@ public partial class Player : MonoBehaviour
     void UpdateStates()
     {
         isGrounded = !isSliding && IsGrounded(capsuleCollider);
-        isSprinting = canSprint && isGrounded && moveInput != Vector2.zero && inputActions.Player.Sprint.IsPressed();
+        isSprinting = canSprint && (isGrounded || isSprinting) && moveInput != Vector2.zero && inputActions.Player.Sprint.IsPressed();
         currentSpeed = isTouchingWater ? speed * (isSprinting ? 1f : 0.7f) : isSprinting ? speed * 1.5f : speed; // Faster when sprinting; water slows
 
         UpdateLocomotionAnimation();

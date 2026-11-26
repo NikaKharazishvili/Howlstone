@@ -21,7 +21,7 @@ TagManager:
   - Occludable
   - Enemy
   - Ground
-  - 
+  - CameraBlock
   - 
   - 
   - 
