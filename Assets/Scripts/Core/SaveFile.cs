@@ -17,6 +17,8 @@ public class SaveData
     public CharacterSave character = new();
     public List<LevelSave> levels = new();
 
+    public DateTime WrittenAt { get; set; }
+
     public LevelSave GetLevel(string scene)
     {
         LevelSave level = levels.Find(l => l.scene == scene);
@@ -48,7 +50,9 @@ public static class SaveFile
         SaveData data;
         try { data = JsonUtility.FromJson<SaveData>(File.ReadAllText(path)); }
         catch (ArgumentException) { return null; }
-        return data != null && data.version <= Version && !string.IsNullOrEmpty(data.account) ? data : null;
+        if (data == null || data.version > Version || string.IsNullOrEmpty(data.account)) return null;
+        data.WrittenAt = File.GetLastWriteTime(path);
+        return data;
     }
 
     public static void StartNew(int slot, string account)
