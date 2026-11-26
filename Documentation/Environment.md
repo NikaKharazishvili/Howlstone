@@ -6,6 +6,27 @@ How a level's world is built: what to make and what to check. Drawing rules: [Re
 - The ground, its paint, water, roads and the other things the owner's environment tools make are made with those tools (from a script when Claude builds), never with a stand-in object that only looks alike: the owner edits the level with the same tools afterwards. Their docs are in the private toolkit.
 - A one-time build script is kept outside the project and deleted after it ran. The scene it changes is copied first.
 
+## Fast way
+Three Unity CLI eval scripts judge a level in seconds, with no new script to write and few pictures:
+`unity command script eval --project-path <project> --result-only --code "$(cat .claude/Level/LevelCheck.cs)"`
+- `LevelCheck.cs`: text, only problems: objects floating, buried or outside the ground, solids crossing, plants inside a solid, coins and enemies with no walkable or a too steep way, water with no trigger, totals. A spot reached only by jumping shows as unreachable, which is right.
+- `LevelShots.cs`: one picture of six views (from above, from the start, arriving at enemies), written to `Temp/LevelShots.png`.
+- `PrefabSheet.cs`: every prefab under `Assets/Objects` whose name holds a text, in one picture with sizes. Replace `SEARCH_TEXT` in the script's text before sending it.
+
+Order: ground shape, water and roads first, then objects, then LevelCheck until clean, then LevelShots.
+
+What it costs (measured in the editor, a 96 m ground):
+- Unity is not the slow part: ground rebuild, colliders, 580 prefabs and the NavMesh bake took under 150 ms together; LevelCheck takes 2.5 s with 762 objects, CLI included.
+- Tokens go mostly into re-reading the chat: the first level build re-read 42 million tokens and wrote 135 thousand (about 480 thousand re-read at each reply). A new level starts in a new chat.
+- A LevelShots picture (1280 x 1080) is about 1800 tokens, a LevelCheck report under 300. The check found floating trees that nine pictures had not shown.
+
+## Caves and overhangs
+No tool or pack is needed. The ground is one height per spot and cannot hang over itself, so a script makes a roof mesh over it:
+- A trench through the hill, a little wider than the cave.
+- The roof: a rough arch inside with a rock material and its own UVs, the hill's own height outside with the ground material (UV: position divided by the ground's size), closed at both mouths.
+- A `MeshCollider` on a layer other than `Ground`, so the floor under it stays the ground.
+- Tested: the NavMesh path goes through. Not tested in Play: the camera and `Occludable` inside.
+
 ## Layout
 - A start, one painted path that leads the eye, a few open spaces joined by it, and one landmark seen from the start.
 - A steep rim closes the area, so no walls have to be placed.
@@ -35,7 +56,13 @@ The test area is not polished further: its faults are kept here for the real lev
 - A script that adds a few objects by a hand-written list skips the free-space check of the scattering.
 - Trees scattered by distance between their centers still cross each other's trunks on slopes.
 - After editing heights by script, refresh the ground's colliders before baking the NavMesh.
+- Water reshapes its banks far past the brush: trees placed before it were left up to 1 m in the air, 13 to 17 m from the pond.
 
 ## Checks before it is done
-- A complete NavMesh path from the start to every open space, and every enemy on the NavMesh.
-- Pictures from the start, from above and in every open space.
+- LevelCheck reports nothing unexpected.
+- One look at LevelShots, plus a view of any open space it does not show.
+
+**Code:**
+- `.claude/Level/LevelCheck.cs`
+- `.claude/Level/LevelShots.cs`
+- `.claude/Level/PrefabSheet.cs`
