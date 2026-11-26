@@ -56,5 +56,6 @@
 - Animation: Documentation/Characters/ClipAnimator.md whole. Lights, shadows, shaders, materials, URP and how the world is drawn: Documentation/Rendering.md whole.
 - Folders, names, import settings and moving assets: Documentation/ProjectStructure.md whole.
 - Saving: Documentation/Saving.md whole.
+- Building or changing a level's world (ground, water, placing objects): Documentation/Environment.md whole.
 - Packs: Documentation/ThirdPartyAssets.md.
 - A prompt for a picture generator: Documentation/ChatGPTPrompts.md whole.
