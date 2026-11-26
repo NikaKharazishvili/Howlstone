@@ -8,7 +8,8 @@ Not done yet. The aim is a small, really good, playable game ([AboutTheGame](Abo
   - [x] `SceneManager` holds the `ShaderGlobals` and applies it.
   - [ ] A day and night control (sun colour, warmth, fake light darkness).
   - [ ] Layers and the renderer features (cavity shading, X-ray) in the PC renderer, and the materials moved to the Universal shader.
-  - [ ] Blob shadows (ground circles) and the fake lights (`PointLight`) with their scripts.
+  - [x] Blob shadows (ground circles): [BlobShadows](BlobShadows.md).
+  - [ ] The fake lights (`PointLight`) with their script.
   - [ ] Write this project's own docs for each (the other project's shader docs are not copied: they describe its own game and the private toolkit).
 - [x] URP reduced to one PC renderer and one pipeline asset (the Mobile ones and the sample profile are deleted, shadows and extra lighting features are off in the URP asset, one PC quality level with shadows off). Left: the real directional lights in both scenes stay until the Universal shader and the day and night control replace them.
 - [x] Covering objects and dying enemies use the X-ray dither of the Universal shader ([Camera](Camera.md)). The separate X-ray renderer feature and material are not needed: the covering object is see-through, so the player is never hidden.

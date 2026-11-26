@@ -4,7 +4,7 @@ How the game is drawn. **This is the plan; what is already built is listed under
 
 ## Rules
 - **No real light, no real shadow, ever.** No `Light` component, no shadow caster or receiver setting, no baked lighting. The URP asset and every quality level have shadows off. The sun's colour comes from the day and night control; shadows under things are blob shadows.
-- **Blob shadows:** painted by the ground shader from a list of circles (one for each character or object that needs it), so they cost no objects and no draw calls. The environment's blob shadows are baked on the ground once.
+- **Blob shadows:** painted by the ground shader from a list of circles (one for each character or object that needs it), so they cost no objects and no draw calls. The environment's blob shadows are baked on the ground once. Details: [BlobShadows](BlobShadows.md).
 - **Fake lights:** a torch, fire or lamp is a point-light component whose light is added inside the shaders (the nearest few only). No Unity light.
 - **Day and night:** one control sets the sun colour, the ambient colour and how dark the fake lights burn.
 - **Cavity shading:** the soft dark creases come from a renderer feature, so it is one full-screen pass and no per-material work.
@@ -25,7 +25,7 @@ How the game is drawn. **This is the plan; what is already built is listed under
 - The other project is top-down, so its systems assume it: no LOD, no occlusion culling, a short view distance, ground circles sized for a high camera, wind and height shading tuned for a view from above. Every ported system is copied, then reviewed for those assumptions and measured here before it is trusted (view distance, culling, shader costs, fake light distances).
 
 ## URP
-- Done: one PC renderer and one pipeline asset (`Assets/Shaders`), one PC quality level, shadows off in both. The `Universal` shader, the ground shaders, the shader globals and cavity shading (a feature of the PC renderer) are ported. Every world material uses `Universal` (Environment, Character, Water or Additive surface type).
+- Done: one PC renderer and one pipeline asset (`Assets/Shaders`), one PC quality level, shadows off in both. The `Universal` shader, the ground shaders, the shader globals and cavity shading (a feature of the PC renderer) are ported, and [blob shadows](BlobShadows.md) are on in Level1. Every world material uses `Universal` (Environment, Character, Water or Additive surface type).
 - Not done: the day and night control, the fake lights in the scene, the real directional lights are still there until then.
 - Bug: an opaque material on the old plain unlit shader drew nothing under this renderer (cause not measured), while a queue 3000 one drew. Check: a new object that is outlined in the scene but not drawn has a material that is not `Universal`.
 
