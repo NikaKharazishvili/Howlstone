@@ -11,7 +11,8 @@ The menu's Options screen: two pages, settings and key bindings (`OptionsMenu` m
 ## Settings
 - Music volume, effects volume, mute in background, contrast, saturation. `GameSettings` owns them: it applies and writes them on every change.
 - A new setting is one value of the `Setting` enum, a field in `SettingsData`, and its cases in `NameOf`, `ValueText` and `Change`.
-- Effects volume is the listener's volume. The music source ignores the listener and takes the music volume (`GameSettings.UseMusic`, given by the scene's manager; a scene without music gives none). The menu has one `AudioSource` for music and one for its sounds.
+- Effects volume is the listener's volume. The music source ignores the listener and takes the music volume (`GameSettings.UseMusic`, given by the scene's manager; a scene without music gives none; `FullMusicVolume` is its volume at 100). The menu has one `AudioSource` for music and one for its sounds.
+- **Bug, cause and check:** the menu music went silent for good: the full volume was read from the source's own volume, which Play had already set to 0 (muted in background) and which stayed 0 in the scene. Never read a value from a scene object that the game itself overwrites: the editor does not reload the scene on Play, and the changed value can be saved. Check: after Play, the source's volume in the scene file.
 - Mute in background also decides whether the game runs while its window is not focused: muted means it stops there.
 - Contrast and saturation are the shader globals of the world shaders (`ShaderGlobals`, held by `SceneManager`, which applies them and then the settings). The sky and the UI do not change.
 - Cavity shading is not a setting, v-sync is always on and there is no FPS counter ([AboutTheGame](AboutTheGame.md)).

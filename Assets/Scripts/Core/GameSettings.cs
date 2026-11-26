@@ -15,10 +15,10 @@ public static class GameSettings
 
     const string FileName = "Settings.json";
     const int Step = 10, MaxVolume = 100, MaxLook = 100;
+    const float FullMusicVolume = 0.5f;
 
     static SettingsData data;
     static AudioSource music;
-    static float fullMusicVolume;
     static bool inBackground;
 
     static string FilePath => Path.Combine(Directory.GetParent(Application.dataPath).FullName, FileName);
@@ -33,11 +33,9 @@ public static class GameSettings
         Application.focusChanged += ApplyForFocus;
     }
 
-    // The scene's music source: its volume in the scene is the volume at 100
     public static void UseMusic(AudioSource source)
     {
         music = source;
-        fullMusicVolume = source.volume;
         source.ignoreListenerVolume = true;
         Apply();
     }
@@ -46,7 +44,7 @@ public static class GameSettings
     {
         bool muted = inBackground && data.muteInBackground;
         AudioListener.volume = muted ? 0 : data.effectsVolume / (float)MaxVolume;
-        if (music) music.volume = muted ? 0 : fullMusicVolume * data.musicVolume / MaxVolume;
+        if (music) music.volume = muted ? 0 : FullMusicVolume * data.musicVolume / MaxVolume;
         Application.runInBackground = !data.muteInBackground;
         (ShaderGlobals.Contrast, ShaderGlobals.Saturation) = (data.contrast, data.saturation);
     }
