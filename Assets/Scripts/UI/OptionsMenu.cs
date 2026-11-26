@@ -22,8 +22,8 @@ public class OptionsMenu
     public bool IsWaitingForKey => keys.IsWaitingForKey;
 
     List<VisualElement> Items => pageItems[page];
-    int PagerItem => Items.Count - 2;
-    int ResetItem => Items.Count - 1;
+    int ResetItem => Items.Count - 2;
+    int PagerItem => Items.Count - 1;
 
     public OptionsMenu(VisualElement root)
     {
@@ -36,7 +36,7 @@ public class OptionsMenu
         VisualElement pager = root.Q("Pager"), reset = root.Q("ResetOptions");
         pageItems[SettingsPage].AddRange(valueLabels);
         pageItems[KeysPage].AddRange(keys.Cells);
-        foreach (List<VisualElement> items in pageItems) { items.Add(pager); items.Add(reset); }
+        foreach (List<VisualElement> items in pageItems) { items.Add(reset); items.Add(pager); }
         ShowPage(SettingsPage);
     }
 
@@ -49,7 +49,7 @@ public class OptionsMenu
     {
         if (Math.Abs(step) == VerticalStep) Select(NextRow(Math.Sign(step)));
         else if (selected == PagerItem) SwitchPage(page + step);
-        else if (selected == ResetItem) Select(PagerItem);
+        else if (selected == ResetItem) return;
         else if (page == SettingsPage) ChangeSelectedSetting(step);
         else Select((selected + step + keys.Cells.Count) % keys.Cells.Count);
     }
@@ -63,14 +63,14 @@ public class OptionsMenu
         finished();
     }
 
-    // On the keys page a row has two cells; after the rows come the pager and the reset entry
+    // On the keys page a row has two cells; after the rows come the reset entry and the pager
     int NextRow(int direction)
     {
         if (page == SettingsPage) return (selected + direction + Items.Count) % Items.Count;
-        if (selected == PagerItem) return direction > 0 ? ResetItem : keys.Cells.Count - CellsPerRow;
-        if (selected == ResetItem) return direction > 0 ? 0 : PagerItem;
+        if (selected == ResetItem) return direction > 0 ? PagerItem : keys.Cells.Count - CellsPerRow;
+        if (selected == PagerItem) return direction > 0 ? 0 : ResetItem;
         int target = selected + direction * CellsPerRow;
-        return target < 0 ? ResetItem : target >= keys.Cells.Count ? PagerItem : target;
+        return target < 0 ? PagerItem : target >= keys.Cells.Count ? ResetItem : target;
     }
 
     void Select(int item)

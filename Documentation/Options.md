@@ -3,7 +3,7 @@
 The menu's Options screen: two pages, settings and key bindings (`OptionsMenu` moves between them).
 
 ## Moving in the screen
-- Under both pages is one bar: the pager (`1 / 2`) and the reset entry, which resets what the shown page holds. Left and Right on the pager change the page, as does Submit; Left or Right on the reset entry goes back to the pager. The pages slide sideways inside a box that hides what is outside it.
+- Under both pages, in the same place on each, are the reset entry (it resets what the shown page holds) and below it the pager (`1 / 2`). Left and Right on the pager change the page, as does Submit. The pages slide sideways inside a box that hides what is outside it.
 - Both pages are tables of the same look. Settings page: Up and Down select, Left and Right change the value, Submit switches an On/Off setting.
 - Keys page: Up, Down, Left and Right select a cell.
 - `OptionsMenu` gets one step from `MenuManager`: size `VerticalStep` is up or down, size 1 is left or right.
