@@ -28,7 +28,7 @@ public class Enemy : MonoBehaviour
     static readonly int CoverFadeID = Shader.PropertyToID("_CoverFade");
     Renderer[] renderers;
     MaterialPropertyBlock fadeBlock;
-    float deathFadeTime = EnemyDeathDeactivateDelay;
+    float timeSinceDeath = EnemyDeathDeactivateDelay;
 
     void Awake()
     {
@@ -54,15 +54,16 @@ public class Enemy : MonoBehaviour
 
     void DitherFadeWhileDying()
     {
-        if (deathFadeTime >= EnemyDeathDeactivateDelay) return;
-        deathFadeTime += Time.deltaTime;
-        fadeBlock.SetFloat(CoverFadeID, Mathf.Clamp01(deathFadeTime / EnemyDeathDeactivateDelay));
+        if (timeSinceDeath >= EnemyDeathDeactivateDelay) return;
+        timeSinceDeath += Time.deltaTime;
+        if (timeSinceDeath < EnemyDeathFadeDelay) return;
+        fadeBlock.SetFloat(CoverFadeID, Mathf.Clamp01((timeSinceDeath - EnemyDeathFadeDelay) / EnemyDeathFadeDuration));
         foreach (Renderer renderer in renderers) renderer.SetPropertyBlock(fadeBlock);
     }
 
     void ClearDeathFade()
     {
-        deathFadeTime = EnemyDeathDeactivateDelay;
+        timeSinceDeath = EnemyDeathDeactivateDelay;
         foreach (Renderer renderer in renderers) renderer.SetPropertyBlock(null);
     }
 
@@ -145,7 +146,7 @@ public class Enemy : MonoBehaviour
         hasTarget = false;
         isGoingBack = false;
         collider.enabled = false;
-        deathFadeTime = 0;
+        timeSinceDeath = 0;
         agent.ResetPath();
         clipAnimator.Play(diedByPlayer ? death1Clip : death2Clip);
         if (diedByPlayer) SM.PlaySound(audioSource, SoundType.PlayerHitEnemy1, SoundType.PlayerHitEnemy2, SoundType.PlayerHitEnemy3, SoundType.PlayerHitEnemy4, SoundType.PlayerHitEnemy5, SoundType.PlayerHitEnemy6);

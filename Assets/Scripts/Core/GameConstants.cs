@@ -24,7 +24,7 @@ public static class GameConstants
     // Enemy
     public const float EnemyRespawnInterval = 20;
     public const float EnemyPatrolRadius = 12;
-    public const float EnemyDeathDeactivateDelay = 3;
+    public const float EnemyDeathFadeDelay = 2, EnemyDeathFadeDuration = 1.5f, EnemyDeathDeactivateDelay = EnemyDeathFadeDelay + EnemyDeathFadeDuration;
     public const float HazardDamageCooldown = 0.8f;
 
     // Enemy Projectile
