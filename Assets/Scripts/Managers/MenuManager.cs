@@ -7,7 +7,7 @@ using static Utils;
 [RequireComponent(typeof(UIDocument))]
 public class MenuManager : MonoBehaviour
 {
-    enum MenuScreen { Main, Account, Options, Loading, Slots }
+    enum MenuScreen { Main, Account, Options, Loading, LoadSlots, NewGameSlots }
     const string HiddenClass = "hidden", SelectedClass = "selected", DimClass = "dim";
     const int MaxAccountNameLength = 16;
     const float SubmitDelay = 0.2f, FirstRepeatDelay = 0.4f, RepeatDelay = 0.12f;
@@ -19,13 +19,12 @@ public class MenuManager : MonoBehaviour
     static readonly int ScreenCount = Enum.GetValues(typeof(MenuScreen)).Length;
     readonly VisualElement[] screens = new VisualElement[ScreenCount];
     readonly List<Label>[] items = new List<Label>[ScreenCount];
-    SaveSlotList slotList;
+    SaveSlotList loadList, newGameList;
     OptionsMenu options;
     ConfirmBox confirm;
     VisualElement background, loadingFill;
     Label accountName, loadingText;
     MenuScreen current;
-    bool isChoosingNewGameSlot;
     int chosenSlot, selected, heldStep, lastLoadingPercent = -1;
     float submitDelay, repeatTimer, inputBlockedUntil;
 
@@ -40,8 +39,10 @@ public class MenuManager : MonoBehaviour
         screens[(int)MenuScreen.Account] = root.Q("Account");
         screens[(int)MenuScreen.Options] = root.Q("Options");
         screens[(int)MenuScreen.Loading] = root.Q("Loading");
-        screens[(int)MenuScreen.Slots] = root.Q("Slots");
-        slotList = new SaveSlotList(screens[(int)MenuScreen.Slots]);
+        screens[(int)MenuScreen.LoadSlots] = root.Q("LoadSlots");
+        screens[(int)MenuScreen.NewGameSlots] = root.Q("NewGameSlots");
+        loadList = new SaveSlotList(screens[(int)MenuScreen.LoadSlots]);
+        newGameList = new SaveSlotList(screens[(int)MenuScreen.NewGameSlots]);
         options = new OptionsMenu(screens[(int)MenuScreen.Options]);
         confirm = new ConfirmBox(root.Q("Confirm"));
         GameSettings.UseMusic(musicSource);
@@ -49,7 +50,8 @@ public class MenuManager : MonoBehaviour
         items[(int)MenuScreen.Account] = screens[(int)MenuScreen.Account].Query<Label>(className: "key").ToList();
         items[(int)MenuScreen.Options] = new List<Label>();
         items[(int)MenuScreen.Loading] = new List<Label>();
-        items[(int)MenuScreen.Slots] = slotList.Slots;
+        items[(int)MenuScreen.LoadSlots] = loadList.Slots;
+        items[(int)MenuScreen.NewGameSlots] = newGameList.Slots;
         items[(int)MenuScreen.Main][0].AddToClassList(SelectedClass);
     }
 
@@ -89,7 +91,7 @@ public class MenuManager : MonoBehaviour
         int horizontalStep = horizontal > 0 ? 1 : horizontal < 0 ? -1 : 0, verticalStep = vertical > 0 ? -1 : vertical < 0 ? 1 : 0;
         switch (current)
         {
-            case MenuScreen.Main: case MenuScreen.Slots: return verticalStep;
+            case MenuScreen.Main: case MenuScreen.LoadSlots: case MenuScreen.NewGameSlots: return verticalStep;
             case MenuScreen.Account: return horizontalStep != 0 ? horizontalStep : verticalStep * KeyColumns;
             case MenuScreen.Options: return horizontalStep != 0 ? horizontalStep : verticalStep * OptionsMenu.VerticalStep;
             case MenuScreen.Loading: return 0;
@@ -117,7 +119,8 @@ public class MenuManager : MonoBehaviour
         {
             case MenuScreen.Main: SubmitMainItem(); break;
             case MenuScreen.Account: SubmitKey(); break;
-            case MenuScreen.Slots: if (isChoosingNewGameSlot) ChooseNewGameSlot(); else LoadSelectedSlot(); break;
+            case MenuScreen.LoadSlots: LoadSelectedSlot(); break;
+            case MenuScreen.NewGameSlots: ChooseNewGameSlot(); break;
             case MenuScreen.Options: SubmitOption(); break;
             case MenuScreen.Loading: break;
             default: throw new NotImplementedException(current.ToString());
@@ -128,8 +131,8 @@ public class MenuManager : MonoBehaviour
     {
         switch (selected)
         {
-            case NewGameIndex: audioSource.PlayOneShot(submitSound); ShowSlots(true); break;
-            case LoadSavedIndex: audioSource.PlayOneShot(submitSound); ShowSlots(false); break;
+            case NewGameIndex: audioSource.PlayOneShot(submitSound); newGameList.ShowForNewGame(); ShowScreen(MenuScreen.NewGameSlots); break;
+            case LoadSavedIndex: audioSource.PlayOneShot(submitSound); loadList.ShowForLoad(); ShowScreen(MenuScreen.LoadSlots); break;
             case OptionsIndex: audioSource.PlayOneShot(submitSound); ShowScreen(MenuScreen.Options); break;
             case ExitIndex: QuitGame(); break;
             default: throw new NotImplementedException(selected.ToString());
@@ -148,8 +151,8 @@ public class MenuManager : MonoBehaviour
         switch (current)
         {
             case MenuScreen.Options: confirm.Ask("Do you really want to reset to default?", options.ResetShownPage); audioSource.PlayOneShot(submitSound); break;
-            case MenuScreen.Slots: if (!isChoosingNewGameSlot) audioSource.PlayOneShot(slotList.AskToDelete(selected, confirm) ? submitSound : cancelSound); break;
-            case MenuScreen.Main: case MenuScreen.Account: case MenuScreen.Loading: break;
+            case MenuScreen.LoadSlots: audioSource.PlayOneShot(loadList.AskToDelete(selected, confirm) ? submitSound : cancelSound); break;
+            case MenuScreen.Main: case MenuScreen.Account: case MenuScreen.Loading: case MenuScreen.NewGameSlots: break;
             default: throw new NotImplementedException(current.ToString());
         }
     }
@@ -159,13 +162,6 @@ public class MenuManager : MonoBehaviour
         chosenSlot = selected;
         audioSource.PlayOneShot(submitSound);
         ShowScreen(MenuScreen.Account);
-    }
-
-    void ShowSlots(bool forNewGame)
-    {
-        isChoosingNewGameSlot = forNewGame;
-        if (forNewGame) slotList.ShowForNewGame(); else slotList.ShowForLoad();
-        ShowScreen(MenuScreen.Slots);
     }
 
     void LoadSelectedSlot()
