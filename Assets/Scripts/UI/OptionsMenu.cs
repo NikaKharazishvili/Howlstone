@@ -22,8 +22,8 @@ public class OptionsMenu
     public bool IsWaitingForKey => keys.IsWaitingForKey;
 
     List<VisualElement> Items => pageItems[page];
-    int ResetItem => Items.Count - 2;
-    int PagerItem => Items.Count - 1;
+    int PagerItem => Items.Count - 2;
+    int ResetItem => Items.Count - 1;
 
     public OptionsMenu(VisualElement root)
     {
@@ -36,11 +36,10 @@ public class OptionsMenu
         VisualElement pager = root.Q("Pager"), reset = root.Q("ResetOptions");
         pageItems[SettingsPage].AddRange(valueLabels);
         pageItems[KeysPage].AddRange(keys.Cells);
-        foreach (List<VisualElement> items in pageItems) { items.Add(reset); items.Add(pager); }
+        foreach (List<VisualElement> items in pageItems) { items.Add(pager); items.Add(reset); }
         ShowPage(SettingsPage);
     }
 
-    // The page stays as it was left; the first entry of it is selected
     public void Open() => Select(0);
 
     public void Close() => Items[selected].RemoveFromClassList(SelectedClass);
@@ -63,14 +62,13 @@ public class OptionsMenu
         finished();
     }
 
-    // On the keys page a row has two cells; after the rows come the reset entry and the pager
     int NextRow(int direction)
     {
         if (page == SettingsPage) return (selected + direction + Items.Count) % Items.Count;
-        if (selected == ResetItem) return direction > 0 ? PagerItem : keys.Cells.Count - CellsPerRow;
-        if (selected == PagerItem) return direction > 0 ? 0 : ResetItem;
+        if (selected == ResetItem) return direction > 0 ? 0 : PagerItem;
+        if (selected == PagerItem) return direction > 0 ? ResetItem : keys.Cells.Count - CellsPerRow;
         int target = selected + direction * CellsPerRow;
-        return target < 0 ? PagerItem : target >= keys.Cells.Count ? ResetItem : target;
+        return target < 0 ? ResetItem : target >= keys.Cells.Count ? PagerItem : target;
     }
 
     void Select(int item)
