@@ -9,12 +9,12 @@ The layout and naming rules of the project (the same style as the owner's other 
 - `Objects/`: everything in the world (models, textures, materials, prefabs, animation clips) by kind, one `Animations` folder inside the kind that uses the clips (clips only, no controllers). `Characters` (`Player`, `Enemies`, `KayKitSkeletons`), `Environment` (`Buildings`, `Nature`, `Structures`, `KayKitDecorations`, `TreePack`, `PolyverseSkies`), `Ground` (`Textures`, `Layers`, the Terrain's material), `Pickups`, `Projectiles`, `Props`, `Weapons`. `SceneManager.prefab`, what every level shares, lies in `Objects` itself. A pack we did not make keeps its own folder inside its kind, untouched. See [ThirdPartyAssets](ThirdPartyAssets.md).
 - `UI/`: HUD and menu art (one file each: the HUD sprites, keys, gamepad buttons, frames and bars), `UI Toolkit` (UXML, USS, theme and panel settings, one folder for each part: [UI](UI.md)), and the UI prefabs.
 - `Shaders/`: shaders, shader includes, and the URP assets (renderer, pipeline asset, volume profile, global settings).
-- `AddressableAssetsData/` and `TextMesh Pro/`: made by their packages; the names are fixed.
+- `TextMesh Pro/`: made by its package; the name is fixed.
 - A new asset goes into the folder of what it is; a new kind of thing gets a folder named like its siblings, never `Other` or `New Folder`.
 
 ## Names
 - Files and folders: `PascalCase`, no spaces, a number at the end only for real variants (`Footsteps1`). Two names that look alike when spaces, underscores and case are ignored are not allowed.
-- Sounds are named like their `SoundType` value, which is also their Addressables address.
+- Sounds are named like their `SoundType` value: the game finds them by that name.
 - Moving or renaming an asset keeps its `.meta`, so references hold. Search the code for the path and name first: only `Assets/...` strings in code and in docs break.
 
 ## Import settings

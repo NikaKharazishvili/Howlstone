@@ -1,6 +1,8 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 using static GameConstants;
+using Random = UnityEngine.Random;
 
 [DefaultExecutionOrder(-100)]
 public class SceneManager : MonoBehaviour
@@ -17,6 +19,8 @@ public class SceneManager : MonoBehaviour
 
     [SerializeField] GameObject coinsParent, enemiesParent, breakablesParent;
     [SerializeField] ShaderGlobals shaderGlobals;
+    [SerializeField] AudioClip[] sounds;
+    readonly Dictionary<SoundType, AudioClip> clips = new();
     const string TestAccount = "Player";
     int currentCoins, maxCoins, currentKills, maxKills, currentBreaks, maxBreaks;
     bool isHudOn = true, canToggleHud = true;
@@ -33,6 +37,7 @@ public class SceneManager : MonoBehaviour
     void Awake()
     {
         Instance = this;
+        foreach (AudioClip clip in sounds) clips.Add(Enum.Parse<SoundType>(clip.name), clip);
         shaderGlobals.Apply();
         GameSettings.Apply();
         if (SaveFile.Current == null && !SaveFile.LoadFirstFilledSlot()) SaveFile.StartNew(0, TestAccount);
@@ -52,7 +57,7 @@ public class SceneManager : MonoBehaviour
 
     void OnValidate() => shaderGlobals.Apply();
 
-    public void PlaySound(AudioSource audioSource, params SoundType[] variants) => Addressables.LoadAssetAsync<AudioClip>(variants[Random.Range(0, variants.Length)].ToString()).Completed += h => audioSource.PlayOneShot(h.Result);
+    public void PlaySound(AudioSource audioSource, params SoundType[] variants) => audioSource.PlayOneShot(clips[variants[Random.Range(0, variants.Length)]]);
 
     public void ToggleHud()
     {

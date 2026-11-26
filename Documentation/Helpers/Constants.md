@@ -9,7 +9,7 @@
 - XpText and Camera: the floating text and the camera's distance, tilt and rotation speeds.
 - Tags: the tag names the code compares with (`TagPlayer`, `TagEnemy`, `TagCoin`, `TagTerrain`, `TagWater`, `TagMovingPlatform`). A new tag in the project must be added here and nowhere else in code.
 - Animation: the default crossfade.
-- Enums: `SoundType` (also the Addressables address of each sound), `EnemyType`, `EnemyProjectileType`.
+- Enums: `SoundType` (each value is also the name of its sound file), `EnemyType`, `EnemyProjectileType`.
 
 ## Rules
 - A value used by one script stays in that script (the Player's animation speeds are in `Player`).

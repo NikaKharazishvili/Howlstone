@@ -7,13 +7,13 @@ The level's manager and global referencer (`SceneManager.Instance`), named like 
 - **Look:** it holds the `ShaderGlobals` (the tuning numbers of the world shaders), applies them in `Awake` and in `OnValidate`, and then applies the player's settings ([Options](../Options.md)).
 - **Pools:** it holds the arrays of pooled shuriken projectiles, enemy projectiles and XP texts; the others take the first inactive one (`Utils.PoolComponent`).
 - **Counters:** coins, kills and breaks. The max is the child count of `coinsParent`, `enemiesParent` and `breakablesParent`, so a level object must be a child of the right parent to count. It only keeps the numbers: the drawing is the [Hud](../UI.md)'s.
-- **Sound:** `PlaySound(source, variants)` loads one of the clips by its `SoundType` name from Addressables (the "Sounds" group) and plays it once on the given source. The address of a sound is the enum name, so a new sound needs an enum value and an Addressables entry with that exact name.
+- **Sound:** `PlaySound(source, variants)` plays one of the variants once on the given source. The clips are linked in the `sounds` list of the prefab and found by their name, which is the `SoundType` value, so a new sound needs an enum value and a clip with that exact name added to the list (any order). A wrong name fails in `Awake`, a missing one when it is first played.
 - **HUD:** it turns the `Hud` object on and binds it in `Awake`, before anything writes to it (the HUD object is off in the scene). `ToggleHud` slides the HUD away and back, with a cooldown (`ToggleHudCD`). `EventText` shows "You are dead", "Level Up!" or "You won!" for a few seconds.
 - **Saving:** `LoadData` and `SaveData`: see [Saving](../Saving.md).
 
 ## Known problems (see [TODO](../TODO.md))
 - Nothing shows "You won!".
-- Sounds are loaded through Addressables on every play (a load handle each time, never released) although they are in every scene. `PlaySound` also makes a `params` array on each call.
+- `PlaySound` makes a `params` array on each call.
 
 **Code:**
 - `Assets/Scripts/Managers/SceneManager.cs`
