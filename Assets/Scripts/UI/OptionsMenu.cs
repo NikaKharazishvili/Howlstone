@@ -12,7 +12,7 @@ public class OptionsMenu
 
     readonly KeyBindingList keys;
     readonly Setting[] settings = (Setting[])Enum.GetValues(typeof(Setting));
-    readonly List<Label> settingLabels = new();
+    readonly List<Label> valueLabels = new();
     readonly VisualElement[] pages;
     readonly List<VisualElement>[] pageItems = { new(), new() };
     readonly VisualElement pageLeft, pageRight;
@@ -22,8 +22,8 @@ public class OptionsMenu
     public bool IsWaitingForKey => keys.IsWaitingForKey;
 
     List<VisualElement> Items => pageItems[page];
-    int PagerItem => Items.Count - 1;
-    int ResetItem => Items.Count - 2;
+    int PagerItem => Items.Count - 2;
+    int ResetItem => Items.Count - 1;
 
     public OptionsMenu(VisualElement root)
     {
@@ -32,21 +32,11 @@ public class OptionsMenu
         pageLeft = root.Q("PageLeft");
         pageRight = root.Q("PageRight");
         pageNumber = root.Q<Label>("PageNumber");
-        VisualElement settingList = root.Q("Settings"), pager = root.Q("Pager");
-        foreach (Setting setting in settings)
-        {
-            Label label = new(GameSettings.Describe(setting)) { pickingMode = PickingMode.Ignore };
-            label.AddToClassList("item");
-            label.AddToClassList("setting");
-            settingList.Add(label);
-            settingLabels.Add(label);
-        }
-        pageItems[SettingsPage].AddRange(settingLabels);
-        pageItems[SettingsPage].Add(root.Q("ResetSettings"));
-        pageItems[SettingsPage].Add(pager);
+        AddSettingRows(root.Q("Settings"));
+        VisualElement pager = root.Q("Pager"), reset = root.Q("ResetOptions");
+        pageItems[SettingsPage].AddRange(valueLabels);
         pageItems[KeysPage].AddRange(keys.Cells);
-        pageItems[KeysPage].Add(root.Q("ResetBindings"));
-        pageItems[KeysPage].Add(pager);
+        foreach (List<VisualElement> items in pageItems) { items.Add(pager); items.Add(reset); }
         ShowPage(SettingsPage);
     }
 
@@ -59,7 +49,7 @@ public class OptionsMenu
     {
         if (Math.Abs(step) == VerticalStep) Select(NextRow(Math.Sign(step)));
         else if (selected == PagerItem) SwitchPage(page + step);
-        else if (selected == ResetItem) return;
+        else if (selected == ResetItem) Select(PagerItem);
         else if (page == SettingsPage) ChangeSelectedSetting(step);
         else Select((selected + step + keys.Cells.Count) % keys.Cells.Count);
     }
@@ -67,21 +57,20 @@ public class OptionsMenu
     public void Submit(Action finished)
     {
         if (selected == PagerItem) SwitchPage(page == SettingsPage ? KeysPage : SettingsPage);
-        else if (page == KeysPage && selected != ResetItem) { keys.WaitForNewKey(selected, finished); return; }
-        else if (page == KeysPage) keys.ResetToDefault();
-        else if (selected == ResetItem) ResetSettings();
+        else if (selected == ResetItem) ResetShownPage();
+        else if (page == KeysPage) { keys.WaitForNewKey(selected, finished); return; }
         else if (settings[selected] == Setting.MuteInBackground) ChangeSelectedSetting(1);
         finished();
     }
 
-    // On the keys page a row has two cells, then come the reset entry and the pager
+    // On the keys page a row has two cells; after the rows come the pager and the reset entry
     int NextRow(int direction)
     {
         if (page == SettingsPage) return (selected + direction + Items.Count) % Items.Count;
-        if (selected == PagerItem) return direction > 0 ? 0 : ResetItem;
-        if (selected == ResetItem) return direction > 0 ? PagerItem : keys.Cells.Count - CellsPerRow;
+        if (selected == PagerItem) return direction > 0 ? ResetItem : keys.Cells.Count - CellsPerRow;
+        if (selected == ResetItem) return direction > 0 ? 0 : PagerItem;
         int target = selected + direction * CellsPerRow;
-        return target < 0 ? PagerItem : target >= keys.Cells.Count ? ResetItem : target;
+        return target < 0 ? ResetItem : target >= keys.Cells.Count ? PagerItem : target;
     }
 
     void Select(int item)
@@ -113,15 +102,37 @@ public class OptionsMenu
         pageNumber.text = $"{page + 1} / {pages.Length}";
     }
 
+    void AddSettingRows(VisualElement table)
+    {
+        foreach (Setting setting in settings)
+        {
+            VisualElement row = AddElement(table, new VisualElement(), "hotkey-row");
+            Label name = AddElement(row, new Label(GameSettings.NameOf(setting)), "hotkey-cell");
+            name.AddToClassList("setting-name");
+            VisualElement holder = AddElement(row, new VisualElement(), "hotkey-cell");
+            holder.AddToClassList("setting-value");
+            valueLabels.Add(AddElement(holder, new Label(GameSettings.ValueText(setting)), "binding"));
+        }
+    }
+
+    static T AddElement<T>(VisualElement parent, T element, string className) where T : VisualElement
+    {
+        element.pickingMode = PickingMode.Ignore;
+        element.AddToClassList(className);
+        parent.Add(element);
+        return element;
+    }
+
     void ChangeSelectedSetting(int direction)
     {
         GameSettings.Change(settings[selected], direction);
-        settingLabels[selected].text = GameSettings.Describe(settings[selected]);
+        valueLabels[selected].text = GameSettings.ValueText(settings[selected]);
     }
 
-    void ResetSettings()
+    void ResetShownPage()
     {
+        if (page == KeysPage) { keys.ResetToDefault(); return; }
         GameSettings.ResetToDefault();
-        for (int i = 0; i < settings.Length; i++) settingLabels[i].text = GameSettings.Describe(settings[i]);
+        for (int i = 0; i < settings.Length; i++) valueLabels[i].text = GameSettings.ValueText(settings[i]);
     }
 }

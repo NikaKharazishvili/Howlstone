@@ -51,15 +51,28 @@ public static class GameSettings
         (ShaderGlobals.Contrast, ShaderGlobals.Saturation) = (data.contrast, data.saturation);
     }
 
-    public static string Describe(Setting setting)
+    public static string NameOf(Setting setting)
     {
         switch (setting)
         {
-            case Setting.MusicVolume: return $"Music  < {data.musicVolume} >";
-            case Setting.EffectsVolume: return $"Effects  < {data.effectsVolume} >";
-            case Setting.MuteInBackground: return $"Mute in background  < {(data.muteInBackground ? "On" : "Off")} >";
-            case Setting.Contrast: return $"Contrast  < {data.contrast} >";
-            case Setting.Saturation: return $"Saturation  < {data.saturation} >";
+            case Setting.MusicVolume: return "Music";
+            case Setting.EffectsVolume: return "Effects";
+            case Setting.MuteInBackground: return "Mute in background";
+            case Setting.Contrast: return "Contrast";
+            case Setting.Saturation: return "Saturation";
+            default: throw new NotImplementedException(setting.ToString());
+        }
+    }
+
+    public static string ValueText(Setting setting)
+    {
+        switch (setting)
+        {
+            case Setting.MusicVolume: return $"< {data.musicVolume} >";
+            case Setting.EffectsVolume: return $"< {data.effectsVolume} >";
+            case Setting.MuteInBackground: return data.muteInBackground ? "< On >" : "< Off >";
+            case Setting.Contrast: return $"< {data.contrast} >";
+            case Setting.Saturation: return $"< {data.saturation} >";
             default: throw new NotImplementedException(setting.ToString());
         }
     }

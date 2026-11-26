@@ -3,14 +3,14 @@
 The menu's Options screen: two pages, settings and key bindings (`OptionsMenu` moves between them).
 
 ## Moving in the screen
-- The last entry of both pages is the pager (`1 / 2`): Left and Right on it change the page, as does Submit. The pages slide sideways inside a box that hides what is outside it.
-- Settings page: Up and Down select, Left and Right change the value, Submit switches an On/Off setting; the entry under the list resets all settings.
+- Under both pages is one bar: the pager (`1 / 2`) and the reset entry, which resets what the shown page holds. Left and Right on the pager change the page, as does Submit; Left or Right on the reset entry goes back to the pager. The pages slide sideways inside a box that hides what is outside it.
+- Both pages are tables of the same look. Settings page: Up and Down select, Left and Right change the value, Submit switches an On/Off setting.
 - Keys page: Up, Down, Left and Right select a cell.
 - `OptionsMenu` gets one step from `MenuManager`: size `VerticalStep` is up or down, size 1 is left or right.
 
 ## Settings
 - Music volume, effects volume, mute in background, contrast, saturation. `GameSettings` owns them: it applies and writes them on every change.
-- A new setting is one value of the `Setting` enum, a field in `SettingsData`, and its case in `Describe` and `Change`.
+- A new setting is one value of the `Setting` enum, a field in `SettingsData`, and its cases in `NameOf`, `ValueText` and `Change`.
 - Effects volume is the listener's volume. The music source ignores the listener and takes the music volume (`GameSettings.UseMusic`, given by the scene's manager; a scene without music gives none). The menu has one `AudioSource` for music and one for its sounds.
 - Mute in background also decides whether the game runs while its window is not focused: muted means it stops there.
 - Contrast and saturation are the shader globals of the world shaders (`ShaderGlobals`, held by `SceneManager`, which applies them and then the settings). The sky and the UI do not change.
@@ -18,7 +18,7 @@ The menu's Options screen: two pages, settings and key bindings (`OptionsMenu` m
 - Saved in `Settings.json` beside the project (beside the build in a build, in `.gitignore`); a missing or unreadable file means the defaults.
 
 ## Key bindings
-- A table of actions with a keyboard cell and a gamepad cell (`KeyBindingList` builds the rows from the input actions). Submit starts waiting for a new key (the cell shows `...`), Escape cancels. The entry under the table resets every key to the default.
+- A table of actions with a keyboard cell and a gamepad cell (`KeyBindingList` builds the rows from the input actions). Submit starts waiting for a new key (the cell shows `...`), Escape cancels. The reset entry puts every key back to the default.
 - A new action the player can rebind gets one `AddRow` line. For a composite (move, camera) the row names the part. A row changes the first binding of its device, so the arrow keys and the left stick always move as well.
 - Only a key of the cell's device is accepted (never the mouse). A key two rows share is allowed and both cells turn red.
 - While waiting, and for a short time after, the menu ignores input, so the key that was pressed does not also move or go back.
