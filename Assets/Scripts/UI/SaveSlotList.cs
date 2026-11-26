@@ -4,7 +4,7 @@ using UnityEngine.UIElements;
 
 public class SaveSlotList
 {
-    const string LoadHint = "Load: Enter /", NewGameHint = "Choose: Enter /", EmptyText = "------", TimeFormat = "d MMM yyyy,  HH:mm", OffClass = "off", EmptyClass = "empty";
+    const string LoadHint = "Load: Enter /", NewGameHint = "Choose: Enter /", EmptyText = "------", TimeFormat = "d MMM yyyy,  HH:mm", OffClass = "off";
     readonly Label submitHint;
     readonly VisualElement deleteHint;
 
@@ -35,7 +35,6 @@ public class SaveSlotList
         for (int slot = 0; slot < Slots.Count; slot++)
         {
             SaveData data = SaveFile.Read(slot);
-            Slots[slot].EnableInClassList(EmptyClass, data == null);
             Slots[slot].text = data == null ? EmptyText : $"{data.account}\n<size=60%>{data.WrittenAt.ToString(TimeFormat, CultureInfo.InvariantCulture)}</size>";
         }
     }
