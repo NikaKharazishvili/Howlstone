@@ -34,6 +34,7 @@
 - Write code so future changes touch one place, not logic scattered across many places.
 - Write final, optimized code from the first line, even for a test or a first version: no Instantiate/Destroy for something that changes often (reuse a fixed object and swap its data), no allocations per frame or per change. Never leave "test code, rewrite later": nobody remembers. A fix must start from a measurement (a value, an axis, a size), never from a number copied from old code.
 - Anything that always exists and whose settings are known in advance (a camera, a particle system, a child object, a mesh) is made in the editor, saved in the scene or prefab, and linked by a serialized field: never `new GameObject`, `AddComponent` or a lazy first-use setup in code. Runtime creation is only for what is not known until play or a pool that has no free item left. When code makes such an object, say so and ask once whether it can be pre-made.
+- What is the same in every scene lives inside the scene manager, saved as one prefab that each scene reuses: never set it up again in each scene.
 - Prefer fewer objects, components and references: add one only when it removes duplicate code or a startup-order problem.
 - Never run an effect twice for one change. Before calling a method, check what it already does inside. Each effect has one owner method that the others call.
 - One way over many: pick the option that's best overall and use it everywhere, even if another is slightly better in some cases. Balance performance with simplicity.
