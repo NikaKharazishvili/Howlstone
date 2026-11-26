@@ -18,6 +18,9 @@ if ($hook.hook_event_name -eq 'Stop') {
 }
 
 $path = $hook.tool_input.file_path
+# Another project's files follow their own rules
+$projectFolder = [IO.Path]::GetFullPath($env:CLAUDE_PROJECT_DIR).TrimEnd('\') + '\'
+if (-not [IO.Path]::GetFullPath($path).StartsWith($projectFolder, [StringComparison]::OrdinalIgnoreCase)) { exit }
 CutFinalNewlines $path
 $months = 'January|February|March|April|May|June|July|August|September|October|November|December'
 $datePattern = "\b\d{1,2}\s+($months)\b|\b($months)\s+\d{1,2}\b|\b($months)\s+20\d\d\b|\b20\d\d-\d\d-\d\d\b"
