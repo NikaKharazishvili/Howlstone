@@ -27,6 +27,14 @@ How a level's world is built: what to make and what to check. Drawing rules: [Re
 - Objects that never move are children of the object `BlobShadows` links as `environment` ([BlobShadows](BlobShadows.md)). Coins, enemies and breakables are children of their counting parents ([SceneManager](Managers/SceneManager.md)).
 - Water has a trigger with the water tag, or it does not slow the player.
 
+## Mistakes to avoid (found in the test area)
+The test area is not polished further: its faults are kept here for the real levels.
+- An arch piece can be closed: it blocked the only path.
+- An object made of several parts must be stood on the ground by all of them together, or it floats.
+- A script that adds a few objects by a hand-written list skips the free-space check of the scattering.
+- Trees scattered by distance between their centers still cross each other's trunks on slopes.
+- After editing heights by script, refresh the ground's colliders before baking the NavMesh.
+
 ## Checks before it is done
 - A complete NavMesh path from the start to every open space, and every enemy on the NavMesh.
 - Pictures from the start, from above and in every open space.

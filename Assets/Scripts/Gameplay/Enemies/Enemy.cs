@@ -120,6 +120,8 @@ public class Enemy : MonoBehaviour
                     if (IsAlive)  // We need to check again if "IsAlive" to avoid a bug where the NPC does attack animation when dead
                     {
                         isDoingAttackAnimation = true;
+                        agent.ResetPath();
+                        agent.velocity = Vector3.zero;
                         clipAnimator.Play(Chance(50) ? attack1Clip : attack2Clip, attackAnimationSpeed); // Does random of 2 attack animations for: Swordsman, Archer, Mage
                         this.Wait(attackDelay, e => e.isDoingAttackAnimation = false);
                     }

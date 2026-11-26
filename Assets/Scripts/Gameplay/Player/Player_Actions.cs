@@ -41,6 +41,7 @@ public partial class Player : MonoBehaviour
         isSliding = onGround && IsTooSteep(under.normal);
         if (onGround && !isSliding && isGrounded) safePosition = transform.position;
 
+        capsuleCollider.sharedMaterial = isGrounded && !isSliding && moveInput == Vector2.zero ? standingMaterial : movingMaterial;
         Vector3 velocity = isSliding ? Downhill(under.normal) * SlideSpeed : KeepOnWalkableGround(horizontalDirection * currentSpeed);
         velocity.y = rb.linearVelocity.y;
         rb.linearVelocity = velocity;

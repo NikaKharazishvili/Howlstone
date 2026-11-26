@@ -13,6 +13,7 @@ The player (the free ninja for now, a humanoid wolf later). One `Player` class s
 - **Edge of the world:** with nothing solid below the spot ahead, the player does not move there. A walkable place must have something under it.
 - **Fallen out:** the last spot stood on gentle ground is kept; falling `MaxFallDepth` under it (through the ground by a bug, or off something) puts the player back there. A real drop deeper than that needs the constant raised.
 - A level whose ground is not on the `Ground` layer lets the player climb anything.
+- **Standing still:** the collider has no friction while moving (or it would stick to walls), so on any slope the body crept downhill with no input. Standing on gentle ground it gets `standingMaterial` (full friction), anything else the material the collider starts with. Check: stand on a slope and watch the position.
 - Sprint costs energy over time and fills it back when not sprinting. After the energy runs out sprint is off until it is full again (`canSprint`).
 
 ## Attacks
@@ -23,7 +24,7 @@ The player (the free ninja for now, a humanoid wolf later). One `Player` class s
 ## Stats, damage, death
 - Health, energy, XP and level are fields of the class and drawn by `UpdateHud`. Every hit takes one health (`TakeDamage`).
 - XP: enemies give `GainXP`; a level up raises `maxXP` and shows the Level Up text.
-- Death: plays the death clip and sounds, then after `PlayerReviveDelay` moves to `respawnPosition` and plays the revive clip, and the player is alive again when it ends. `respawnPosition` is the start position, or the saved one.
+- Death: the body is frozen sideways (it still falls to the ground), so neither a slope nor an enemy moves it, until it is alive again. It plays the death clip and sounds, then after `PlayerReviveDelay` moves to `respawnPosition` and plays the revive clip, and the player is alive again when it ends. `respawnPosition` is the start position, or the saved one.
 
 ## Animation
 - `UpdateLocomotionAnimation` picks airborne, moving or idle each frame, unless the player is dead or spinning or a one-time clip (throw, hit, death, revive) is still playing.

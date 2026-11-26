@@ -21,10 +21,13 @@ public partial class Player : MonoBehaviour
     [SerializeField] AnimationClip idleClip, moveClip, jumpFallClip, spin1Clip, spin2Clip, throwClip, getHitClip, deathClip, reviveClip;
     [SerializeField] Rigidbody rb;
     [SerializeField] CapsuleCollider capsuleCollider;
+    [SerializeField] PhysicsMaterial standingMaterial;
     [SerializeField] AudioSource audioSource;
+    PhysicsMaterial movingMaterial;
 
     void Awake()
     {
+        movingMaterial = capsuleCollider.sharedMaterial;
         inputActions = KeyBindings.CreateActions();
         groundMask = LayerMask.GetMask(GroundLayer);
         LoadPlayerStats();
@@ -123,6 +126,7 @@ public partial class Player : MonoBehaviour
         if (!IsAlive) // Death
         {
             rb.linearVelocity = Vector3.zero;
+            rb.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ;
             isSpinning = false;
             clipAnimator.Play(deathClip, DeathSpeed);
             SM.PlaySound(audioSource, SoundType.PlayerDeath1, SoundType.PlayerDeath2);
@@ -131,11 +135,12 @@ public partial class Player : MonoBehaviour
             this.Wait(PlayerReviveDelay, p =>
             {
                 p.clipAnimator.Play(p.reviveClip, ReviveSpeed);
-                p.transform.position = p.respawnPosition;
+                p.transform.position = p.safePosition = p.respawnPosition;
                 // A slight delay of making Player alive so revive animation plays fully without interfering
                 p.Wait(2, p2 =>
                 {
                     p2.IsAlive = true;
+                    p2.rb.constraints = RigidbodyConstraints.FreezeRotation;
                     p2.currentHealth = p2.maxHealth;
                     p2.spinCD = p2.spinReady;
                     p2.currentEnergy = p2.maxEnergy;
