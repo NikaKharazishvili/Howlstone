@@ -12,6 +12,9 @@ public class Cam : MonoBehaviour
     const float CameraRadius = 0.3f, CameraReturnSpeed = 5;
     float distance = CameraZoom;
 
+    // The most objects between the camera and the player that can dither at once
+    const int MaxOccluders = 16;
+    readonly RaycastHit[] occluderHits = new RaycastHit[MaxOccluders];
     readonly Dictionary<int, Occludable> occluderCache = new();
     HashSet<Occludable> hiddenLastFrame = new();
     HashSet<Occludable> hitThisFrame = new();
@@ -63,11 +66,11 @@ public class Cam : MonoBehaviour
     void CastAndCollectHits()
     {
         Vector3 direction = Player.transform.position + transform.up - transform.position;
-        RaycastHit[] hits = Physics.RaycastAll(transform.position, direction.normalized, direction.magnitude, occludableLayer);
+        int count = Physics.RaycastNonAlloc(transform.position, direction.normalized, occluderHits, direction.magnitude, occludableLayer);
 
-        foreach (var hit in hits)
+        for (int i = 0; i < count; i++)
         {
-            Occludable occludable = GetOrCacheOccludable(hit.collider);
+            Occludable occludable = GetOrCacheOccludable(occluderHits[i].collider);
             if (!occludable) continue;
             hitThisFrame.Add(occludable);
             if (!hiddenLastFrame.Contains(occludable)) occludable.Hide();
