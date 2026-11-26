@@ -9,8 +9,8 @@ public class BlobShadows : MonoBehaviour
     const int MaxCircles = 256;
     // Circles: darkness, size against the half width of what casts it, and the ray that finds the ground under a character
     const float Strength = 0.85f, Scale = 1.5f, RayStart = 0.5f, RayLength = 20;
-    // Baked map of the environment: sharpness, size limit, and how high above the ground an object still casts
-    const float TexelsPerMeter = 2, MaxHeightAboveGround = 1;
+    // Baked map of the environment: sharpness and size limit
+    const float TexelsPerMeter = 2;
     const int MaxMapSize = 2048;
     // Surface types of the world shader from this one up (water, glows) cast nothing
     const int FirstSurfaceWithoutShadow = 2;
@@ -18,22 +18,23 @@ public class BlobShadows : MonoBehaviour
     static readonly int CirclesId = Shader.PropertyToID("_GroundCircles"), CircleCountId = Shader.PropertyToID("_GroundCircleCount"), StrengthId = Shader.PropertyToID("_BlobShadowStrength"),
         MapId = Shader.PropertyToID("_BlobShadowMap"), RectId = Shader.PropertyToID("_BlobShadowRect"), SurfaceTypeId = Shader.PropertyToID("_SurfaceType");
 
-    [SerializeField] Terrain ground;
+    [SerializeField] Transform environment;
     readonly Vector4[] circles = new Vector4[MaxCircles];
     readonly List<(Collider body, Renderer look)> characters = new();
+    readonly List<Vector3> casters = new(); // x, z and radius of every circle to bake
     Texture2D map;
 
     void OnEnable()
     {
-        Vector3 size = ground.terrainData.size;
-        float texelsPerMeter = Mathf.Min(TexelsPerMeter, MaxMapSize / Mathf.Max(size.x, size.z));
-        map = new Texture2D(Mathf.CeilToInt(size.x * texelsPerMeter), Mathf.CeilToInt(size.z * texelsPerMeter), TextureFormat.R8, false, true)
+        Rect area = FindCasters();
+        float texelsPerMeter = Mathf.Min(TexelsPerMeter, MaxMapSize / Mathf.Max(area.width, area.height));
+        map = new Texture2D(Mathf.CeilToInt(area.width * texelsPerMeter), Mathf.CeilToInt(area.height * texelsPerMeter), TextureFormat.R8, false, true)
             { name = "Blob Shadows", wrapMode = TextureWrapMode.Clamp, hideFlags = HideFlags.HideAndDontSave };
         Shader.SetGlobalTexture(MapId, map);
-        Shader.SetGlobalVector(RectId, new Vector4(ground.GetPosition().x, ground.GetPosition().z, texelsPerMeter / map.width, texelsPerMeter / map.height));
+        Shader.SetGlobalVector(RectId, new Vector4(area.x, area.y, texelsPerMeter / map.width, texelsPerMeter / map.height));
         Shader.SetGlobalFloat(StrengthId, Strength);
         FindCharacters();
-        BakeEnvironment(texelsPerMeter);
+        BakeEnvironment(area, texelsPerMeter);
     }
 
     void OnDisable()
@@ -78,16 +79,31 @@ public class BlobShadows : MonoBehaviour
         _ => throw new NotImplementedException(body.GetType().Name)
     };
 
-    // Every object under the ground gets one circle in the map, where circles overlap the darkest wins
-    void BakeEnvironment(float texelsPerMeter)
+    // Every object under the environment gets one circle; returns the area on X and Z that holds all of them
+    Rect FindCasters()
     {
-        Vector3 corner = ground.GetPosition();
-        var shadows = new byte[map.width * map.height];
-        foreach (Renderer look in ground.GetComponentsInChildren<Renderer>())
+        casters.Clear();
+        Vector2 min = Vector2.positiveInfinity, max = Vector2.negativeInfinity;
+        foreach (Renderer look in environment.GetComponentsInChildren<Renderer>())
         {
+            if (!look.enabled || look.sharedMaterial.GetFloat(SurfaceTypeId) >= FirstSurfaceWithoutShadow) continue;
             Bounds bounds = look.bounds;
-            if (!look.enabled || look.sharedMaterial.GetFloat(SurfaceTypeId) >= FirstSurfaceWithoutShadow || bounds.min.y - corner.y - ground.SampleHeight(bounds.center) > MaxHeightAboveGround) continue;
-            float x = (bounds.center.x - corner.x) * texelsPerMeter, z = (bounds.center.z - corner.z) * texelsPerMeter, radius = Mathf.Max(bounds.extents.x, bounds.extents.z) * Scale * texelsPerMeter;
+            float radius = Mathf.Max(bounds.extents.x, bounds.extents.z) * Scale;
+            casters.Add(new Vector3(bounds.center.x, bounds.center.z, radius));
+            var center = new Vector2(bounds.center.x, bounds.center.z);
+            min = Vector2.Min(min, center - Vector2.one * radius);
+            max = Vector2.Max(max, center + Vector2.one * radius);
+        }
+        return Rect.MinMaxRect(min.x, min.y, max.x, max.y);
+    }
+
+    // Where circles overlap the darkest wins
+    void BakeEnvironment(Rect area, float texelsPerMeter)
+    {
+        var shadows = new byte[map.width * map.height];
+        foreach (Vector3 caster in casters)
+        {
+            float x = (caster.x - area.x) * texelsPerMeter, z = (caster.y - area.y) * texelsPerMeter, radius = caster.z * texelsPerMeter;
             for (int j = Mathf.Max(0, (int)(z - radius)); j < Mathf.Min(map.height, z + radius); j++)
                 for (int i = Mathf.Max(0, (int)(x - radius)); i < Mathf.Min(map.width, x + radius); i++)
                 {

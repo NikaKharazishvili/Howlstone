@@ -16,7 +16,7 @@ Not done yet. The aim is a small, really good, playable game ([AboutTheGame](Abo
 - [x] Every material uses the Universal shader; the old shaders and the unused pack shaders are deleted.
 - [ ] Port the breakables (crates, barrels, pots) and the chest, with their break effect.
 - [ ] Decide the draw method for the environment by measuring clusters against static batching plus LOD groups ([Rendering](Rendering.md)); write the numbers in [Optimizations](Optimizations.md).
-- [ ] Rebuild Level1's ground with the owner's ground tool instead of Unity Terrain, and place props with its prefab tool; then remove the Terrain data and the unused terrain textures.
+- [ ] Level1 has a small test area on the owner's ground instead of Unity Terrain; the full level is still to be designed. When the backup scene with the terrain is no longer wanted, delete it with the Terrain data, the terrain shaders and material and the unused terrain textures.
 - [x] The HUD and the menu are in UI Toolkit and the Canvas versions are deleted ([UI](UI.md)). Left: gamepad navigation in the menu (it still uses the old Input Manager), the mouse, and a check of the layout at other screen shapes.
 - [ ] The HUD icons (coin, kill, box, life) are not a multiple of 4 in size, so they stay uncompressed: resize them. `Divider`, `Life` and `FramePanel` are not used by any USS yet.
 - [ ] Gamepad: every action and every menu works with a gamepad as well as the keyboard.
