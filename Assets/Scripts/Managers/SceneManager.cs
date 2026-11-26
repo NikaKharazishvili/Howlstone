@@ -16,6 +16,7 @@ public class SceneManager : MonoBehaviour
     [field: SerializeField] public XPText[] XpTexts { get; private set; }
 
     [SerializeField] GameObject coinsParent, enemiesParent, breakablesParent;
+    [SerializeField] ShaderGlobals shaderGlobals;
     const string TestAccount = "Player";
     int currentCoins, maxCoins, currentKills, maxKills, currentBreaks, maxBreaks;
     bool isHudOn = true, canToggleHud = true;
@@ -32,6 +33,8 @@ public class SceneManager : MonoBehaviour
     void Awake()
     {
         Instance = this;
+        shaderGlobals.Apply();
+        GameSettings.Apply();
         if (SaveFile.Current == null && !SaveFile.LoadFirstFilledSlot()) SaveFile.StartNew(0, TestAccount);
         Player.SM = this;
         Cam.Player = Player;
@@ -46,6 +49,8 @@ public class SceneManager : MonoBehaviour
         Hud.Bind();
         LoadData();
     }
+
+    void OnValidate() => shaderGlobals.Apply();
 
     public void PlaySound(AudioSource audioSource, params SoundType[] variants) => Addressables.LoadAssetAsync<AudioClip>(variants[Random.Range(0, variants.Length)].ToString()).Completed += h => audioSource.PlayOneShot(h.Result);
 

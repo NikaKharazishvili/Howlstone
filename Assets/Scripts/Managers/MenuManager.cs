@@ -7,59 +7,54 @@ using static Utils;
 [RequireComponent(typeof(UIDocument))]
 public class MenuManager : MonoBehaviour
 {
-    enum MenuScreen { Main, Account, Tips, Loading, Slots }
-    const string HiddenClass = "hidden", PageBeforeClass = "page-before", PageAfterClass = "page-after", SelectedClass = "selected", DimClass = "dim", OffClass = "off", InstantClass = "instant";
+    enum MenuScreen { Main, Account, Options, Loading, Slots }
+    const string HiddenClass = "hidden", SelectedClass = "selected", DimClass = "dim";
     const int MaxAccountNameLength = 16;
     const float SubmitDelay = 0.2f, FirstRepeatDelay = 0.4f, RepeatDelay = 0.12f;
-    const int KeyColumns = 7, DeleteKeyIndex = 26, SaveKeyIndex = 27, NewGameIndex = 0, LoadSavedIndex = 1, TipsIndex = 2, ExitIndex = 3;
+    const int KeyColumns = 7, DeleteKeyIndex = 26, SaveKeyIndex = 27, NewGameIndex = 0, LoadSavedIndex = 1, OptionsIndex = 2, ExitIndex = 3;
 
     [SerializeField] AudioClip selectionSound, submitSound, cancelSound, keyboardSound;
-    [SerializeField] AudioSource audioSource;
+    [SerializeField] AudioSource audioSource, musicSource;
     [SerializeField] UIDocument document;
     static readonly int ScreenCount = Enum.GetValues(typeof(MenuScreen)).Length;
     readonly VisualElement[] screens = new VisualElement[ScreenCount];
     readonly List<Label>[] items = new List<Label>[ScreenCount];
     SaveSlotList slotList;
-    List<VisualElement> tipPages;
-    List<string> tipTitles;
-    VisualElement background, loadingFill, pageLeft, pageRight;
-    Label accountName, loadingText, pageNumber, tipTitle;
+    OptionsMenu options;
+    VisualElement background, loadingFill;
+    Label accountName, loadingText;
     MenuScreen current;
     bool isChoosingNewGameSlot;
-    int chosenSlot, selected, tipPage, heldStep, lastLoadingPercent = -1;
-    float submitDelay, repeatTimer;
+    int chosenSlot, selected, heldStep, lastLoadingPercent = -1;
+    float submitDelay, repeatTimer, inputBlockedUntil;
 
     void Start()
     {
         VisualElement root = document.rootVisualElement;
         background = root.Q("Background");
         accountName = root.Q<Label>("AccountName");
-        pageNumber = root.Q<Label>("PageNumber");
-        tipTitle = root.Q<Label>("TipTitle");
-        pageLeft = root.Q("PageLeft");
-        pageRight = root.Q("PageRight");
         loadingText = root.Q<Label>("LoadingText");
         loadingFill = root.Q("LoadingFill");
         screens[(int)MenuScreen.Main] = root.Q("Main");
         screens[(int)MenuScreen.Account] = root.Q("Account");
-        screens[(int)MenuScreen.Tips] = root.Q("Tips");
+        screens[(int)MenuScreen.Options] = root.Q("Options");
         screens[(int)MenuScreen.Loading] = root.Q("Loading");
-        items[(int)MenuScreen.Main] = screens[(int)MenuScreen.Main].Query<Label>(className: "item").ToList();
-        items[(int)MenuScreen.Account] = screens[(int)MenuScreen.Account].Query<Label>(className: "key").ToList();
-        items[(int)MenuScreen.Tips] = new List<Label>();
-        items[(int)MenuScreen.Loading] = new List<Label>();
         screens[(int)MenuScreen.Slots] = root.Q("Slots");
         slotList = new SaveSlotList(screens[(int)MenuScreen.Slots]);
+        options = new OptionsMenu(screens[(int)MenuScreen.Options]);
+        GameSettings.UseMusic(musicSource);
+        items[(int)MenuScreen.Main] = screens[(int)MenuScreen.Main].Query<Label>(className: "item").ToList();
+        items[(int)MenuScreen.Account] = screens[(int)MenuScreen.Account].Query<Label>(className: "key").ToList();
+        items[(int)MenuScreen.Options] = new List<Label>();
+        items[(int)MenuScreen.Loading] = new List<Label>();
         items[(int)MenuScreen.Slots] = slotList.Slots;
-        tipPages = screens[(int)MenuScreen.Tips].Query(className: "tip-page").ToList();
-        tipTitles = tipPages.ConvertAll(page => page.Q<Label>(className: "tip-page-title").text);
         items[(int)MenuScreen.Main][0].AddToClassList(SelectedClass);
     }
 
     void Update()
     {
         submitDelay = Mathf.Max(0, submitDelay - Time.deltaTime);
-        if (current == MenuScreen.Loading) return;
+        if (current == MenuScreen.Loading || options.IsWaitingForKey || Time.time < inputBlockedUntil) return;
         if (Input.GetButtonDown("Cancel") && current != MenuScreen.Main) { GoBackToMain(); return; }
         MoveByHeldKey();
         bool submitted = current == MenuScreen.Account ? Input.GetButton("Submit") : Input.GetButtonDown("Submit");
@@ -92,7 +87,7 @@ public class MenuManager : MonoBehaviour
         {
             case MenuScreen.Main: case MenuScreen.Slots: return verticalStep;
             case MenuScreen.Account: return horizontalStep != 0 ? horizontalStep : verticalStep * KeyColumns;
-            case MenuScreen.Tips: return horizontalStep;
+            case MenuScreen.Options: return horizontalStep != 0 ? horizontalStep : verticalStep * OptionsMenu.VerticalStep;
             case MenuScreen.Loading: return 0;
             default: throw new NotImplementedException(current.ToString());
         }
@@ -100,12 +95,7 @@ public class MenuManager : MonoBehaviour
 
     void Move(int step)
     {
-        if (current == MenuScreen.Tips)
-        {
-            int page = tipPage + step;
-            if (page < 0 || page >= tipPages.Count) return;
-            ShowTipPage(page);
-        }
+        if (current == MenuScreen.Options) options.Move(step);
         else
         {
             List<Label> list = items[(int)current];
@@ -116,28 +106,6 @@ public class MenuManager : MonoBehaviour
         audioSource.PlayOneShot(selectionSound);
     }
 
-    void ShowFirstTipPageWithoutSliding()
-    {
-        VisualElement tips = screens[(int)MenuScreen.Tips];
-        tips.AddToClassList(InstantClass);
-        ShowTipPage(0);
-        tips.schedule.Execute(() => tips.RemoveFromClassList(InstantClass)).ExecuteLater(60);
-    }
-
-    void ShowTipPage(int page)
-    {
-        tipPage = page;
-        for (int i = 0; i < tipPages.Count; i++)
-        {
-            tipPages[i].EnableInClassList(PageBeforeClass, i < page);
-            tipPages[i].EnableInClassList(PageAfterClass, i > page);
-        }
-        pageLeft.EnableInClassList(OffClass, page == 0);
-        pageRight.EnableInClassList(OffClass, page == tipPages.Count - 1);
-        tipTitle.text = tipTitles[page];
-        pageNumber.text = $"{page + 1} / {tipPages.Count}";
-    }
-
     void Submit()
     {
         submitDelay = SubmitDelay;
@@ -146,7 +114,7 @@ public class MenuManager : MonoBehaviour
             case MenuScreen.Main: SubmitMainItem(); break;
             case MenuScreen.Account: SubmitKey(); break;
             case MenuScreen.Slots: if (isChoosingNewGameSlot) ChooseNewGameSlot(); else LoadSelectedSlot(); break;
-            case MenuScreen.Tips: break;
+            case MenuScreen.Options: SubmitOption(); break;
             case MenuScreen.Loading: break;
             default: throw new NotImplementedException(current.ToString());
         }
@@ -158,10 +126,17 @@ public class MenuManager : MonoBehaviour
         {
             case NewGameIndex: audioSource.PlayOneShot(submitSound); ShowSlots(true); break;
             case LoadSavedIndex: audioSource.PlayOneShot(submitSound); ShowSlots(false); break;
-            case TipsIndex: audioSource.PlayOneShot(submitSound); ShowScreen(MenuScreen.Tips); break;
+            case OptionsIndex: audioSource.PlayOneShot(submitSound); ShowScreen(MenuScreen.Options); break;
             case ExitIndex: QuitGame(); break;
             default: throw new NotImplementedException(selected.ToString());
         }
+    }
+
+    // The key that ends the waiting must not also move, submit or go back in the menu
+    void SubmitOption()
+    {
+        audioSource.PlayOneShot(submitSound);
+        options.Submit(() => inputBlockedUntil = Time.time + SubmitDelay);
     }
 
     void ChooseNewGameSlot()
@@ -231,11 +206,12 @@ public class MenuManager : MonoBehaviour
         screens[(int)next].RemoveFromClassList(HiddenClass);
         background.EnableInClassList(DimClass, next != MenuScreen.Main);
         foreach (Label item in items[(int)current]) item.RemoveFromClassList(SelectedClass);
+        if (current == MenuScreen.Options) options.Close();
         current = next;
         selected = 0;
         submitDelay = SubmitDelay;
         heldStep = 0;
-        if (next == MenuScreen.Tips) ShowFirstTipPageWithoutSliding();
+        if (next == MenuScreen.Options) options.Open();
         if (items[(int)next].Count > 0) items[(int)next][0].AddToClassList(SelectedClass);
     }
 

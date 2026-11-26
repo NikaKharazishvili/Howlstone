@@ -4,6 +4,7 @@ The level's manager and global referencer (`SceneManager.Instance`), named like 
 
 ## What it does
 - **Wiring:** `Awake` gives its references to `Player`, `Cam`, `ShurikenProjectile`, `Enemy`, `EnemyProjectile`, `Hazard` and `XPText` through static fields (`SM` in the classes that keep it). `SetUpScene` (called by hand in the editor) finds the player, the camera, the XP texts and both projectile pools.
+- **Look:** it holds the `ShaderGlobals` (the tuning numbers of the world shaders), applies them in `Awake` and in `OnValidate`, and then applies the player's settings ([Options](../Options.md)).
 - **Pools:** it holds the arrays of pooled shuriken projectiles, enemy projectiles and XP texts; the others take the first inactive one (`Utils.PoolComponent`).
 - **Counters:** coins, kills and breaks. The max is the child count of `coinsParent`, `enemiesParent` and `breakablesParent`, so a level object must be a child of the right parent to count. It only keeps the numbers: the drawing is the [Hud](../UI.md)'s.
 - **Sound:** `PlaySound(source, variants)` loads one of the clips by its `SoundType` name from Addressables (the "Sounds" group) and plays it once on the given source. The address of a sound is the enum name, so a new sound needs an enum value and an Addressables entry with that exact name.

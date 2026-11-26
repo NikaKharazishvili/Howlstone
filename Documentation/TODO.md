@@ -4,8 +4,9 @@ Not done yet. The aim is a small, really good, playable game ([AboutTheGame](Abo
 
 ## Step 1: set up the project (before gameplay work)
 - [ ] Port the rendering base from the owner's other project, system by system, reviewing each for its top-down assumptions ([Rendering](Rendering.md) - Porting): the Universal shader (no hue swap), the ground shader, blob shadows, fake lights, day and night, cavity shading as a renderer feature, and the screen effects (edited for this game). Rules: [Rendering](Rendering.md).
-  - [x] Copied: the Universal, ground and cavity shaders and their includes (`Assets/Shaders`), and `ShaderGlobals`, `ShaderGUIs` and `CavityShadingFeature` (`Assets/Scripts/Rendering`). Nothing uses them yet.
-  - [ ] A scene object that holds the `ShaderGlobals` and applies it, and a day and night control (sun colour, warmth, fake light darkness).
+  - [x] Copied: the Universal, ground and cavity shaders and their includes (`Assets/Shaders`), and `ShaderGlobals`, `ShaderGUIs` and `CavityShadingFeature` (`Assets/Scripts/Rendering`).
+  - [x] `SceneManager` holds the `ShaderGlobals` and applies it.
+  - [ ] A day and night control (sun colour, warmth, fake light darkness).
   - [ ] Layers and the renderer features (cavity shading, X-ray) in the PC renderer, and the materials moved to the Universal shader.
   - [ ] Blob shadows (ground circles) and the fake lights (`PointLight`) with their scripts.
   - [ ] Write this project's own docs for each (the other project's shader docs are not copied: they describe its own game and the private toolkit).
@@ -25,7 +26,7 @@ Not done yet. The aim is a small, really good, playable game ([AboutTheGame](Abo
 - [ ] Automatic upgrades: a table of what each level up gives, and the pause menu page that shows it.
 - [ ] Rewards: drops from enemies, chests and breakables.
 - [ ] Level 2, with its own enemies and challenges.
-- [ ] The pause menu has Resume, Load, Main Menu and Exit ([UI](UI.md)). Still to build: an options menu in UI Toolkit: volume, graphics (resolution, quality, contrast, saturation), key and gamepad rebinding, language. Settings are saved outside `Assets` like the saves.
+- [ ] The pause menu has Resume, Load, Main Menu and Exit ([UI](UI.md)). The menu's Options has volumes, mute in background, contrast, saturation and the key bindings ([Options](Options.md)). Still to build: Options in the pause menu, graphics (resolution, quality), language. Settings are saved outside `Assets` like the saves.
 - [ ] Localization: string tables from the first text we rebuild, English then Russian.
 - [ ] A death screen.
 

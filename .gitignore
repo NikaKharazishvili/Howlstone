@@ -15,8 +15,10 @@
 !/Assets/Scripts/
 !/Assets/Scripts.meta
 
-# Save files the game writes at run time
+# Save files and the player's own keys, written at run time
 /Saves/
+/KeyBindings.json
+/Settings.json
 
 # Private toolkit
 /Assets/Scripts/Nikson/

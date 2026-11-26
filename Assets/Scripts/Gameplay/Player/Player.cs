@@ -25,7 +25,7 @@ public partial class Player : MonoBehaviour
 
     void Awake()
     {
-        inputActions = new PlayerInputActions();
+        inputActions = KeyBindings.CreateActions();
         LoadPlayerStats();
     }
 
