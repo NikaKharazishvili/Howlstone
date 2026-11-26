@@ -1,6 +1,6 @@
 # SceneManager
 
-The level's manager and global referencer (`SceneManager.Instance`), named like the owner's other project. It lives in `Level1` and runs first (`DefaultExecutionOrder`). It is in the global namespace, so Unity's own is always written in full (`UnityEngine.SceneManagement.SceneManager`).
+The level's manager and global referencer (`SceneManager.Instance`), named like the owner's other project. It is the prefab `Assets/Objects/SceneManager.prefab`, which holds what every level has (the camera, the HUD with the pause menu, the player, the pooled objects); a new level places the prefab, moves the player and links its own `coinsParent`, `enemiesParent` and `breakablesParent`. A change meant for every level is applied to the prefab, never left as a change of one scene's copy. It runs first (`DefaultExecutionOrder`). It is in the global namespace, so Unity's own is always written in full (`UnityEngine.SceneManagement.SceneManager`).
 
 ## What it does
 - **Wiring:** `Awake` gives its references to `Player`, `Cam`, `ShurikenProjectile`, `Enemy`, `EnemyProjectile`, `Hazard` and `XPText` through static fields (`SM` in the classes that keep it). `SetUpScene` (called by hand in the editor) finds the player, the camera, the XP texts and both projectile pools.
