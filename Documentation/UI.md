@@ -32,6 +32,12 @@ UI Toolkit only, no Canvas and no uGUI. The files are in `Assets/UI/UI Toolkit`:
 - The slot list is the template `SaveSlots.uxml` placed in both documents (`Menu.uxml`, `Hud.uxml`) as an instance named `Slots`, so each document has one element with that name.
 - `screen`, `heading`, `item` and `item.selected` are in `Common.uss`, shared with the main menu.
 
+## Confirm box
+- `ConfirmBox` asks yes or no before something is erased: a reset of an options page, a deleted save. It is the template `ConfirmBox.uxml`, the last element of `Menu.uxml` and `Hud.uxml` (an instance named `Confirm`), so it draws over everything. It appears at once.
+- Submit is yes, Cancel is no. While it is open its owner calls `ReadAnswer` and reads no other input.
+- The erase key (`IsEraseKeyPressed`: R, or gamepad button 2, the square place on an Xbox-style layout) is one key for every such action. A screen that has one shows it as the last part of its line of keys (`key-hint-erase`, `pad-square`).
+- The slot list shows Delete only while loading, never while choosing the slot of a new game. An empty slot has nothing to delete (the cancel sound).
+
 ## XPText
 - A pooled 3D text that shows "XP +n" above a dead enemy, floats up, keeps the same size on screen at any distance (`Utils.SetScreenSizeBillboard`) and switches off after `XpTextLifespan`.
 - `XPText.Cam` is a static field that `SceneManager.Awake` fills.
@@ -41,3 +47,4 @@ UI Toolkit only, no Canvas and no uGUI. The files are in `Assets/UI/UI Toolkit`:
 - `Assets/Scripts/UI/XPText.cs`
 - `Assets/Scripts/UI/PauseMenu.cs`
 - `Assets/Scripts/UI/SaveSlotList.cs`
+- `Assets/Scripts/UI/ConfirmBox.cs`

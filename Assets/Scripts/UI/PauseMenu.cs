@@ -15,6 +15,7 @@ public class PauseMenu : MonoBehaviour
     [SerializeField] AudioClip selectionSound, submitSound, cancelSound;
     VisualElement pause, slots;
     SaveSlotList slotList;
+    ConfirmBox confirm;
     List<Label> pauseItems;
     bool isPaused, isShowingSlots;
     int selected, heldStep;
@@ -28,14 +29,17 @@ public class PauseMenu : MonoBehaviour
         pause = root.Q("Pause");
         slots = root.Q("Slots");
         slotList = new SaveSlotList(slots);
+        confirm = new ConfirmBox(root.Q("Confirm"));
         pauseItems = pause.Query<Label>(className: "item").ToList();
         pauseItems[0].AddToClassList(SelectedClass);
     }
 
     void Update()
     {
+        if (confirm.IsOpen) { confirm.ReadAnswer(audioSource, submitSound, cancelSound); return; }
         if (Input.GetButtonDown("Cancel")) { if (isShowingSlots) ShowSlots(false); else SetPaused(!isPaused); return; }
         if (!isPaused) return;
+        if (isShowingSlots && ConfirmBox.IsEraseKeyPressed) { audioSource.PlayOneShot(slotList.AskToDelete(selected, confirm) ? submitSound : cancelSound); return; }
         MoveSelection();
         if (Input.GetButtonDown("Submit")) Submit();
     }

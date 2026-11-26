@@ -58,6 +58,8 @@ public static class SaveFile
         Write();
     }
 
+    public static void Delete(int slot) => File.Delete(PathOf(slot));
+
     public static bool Load(int slot)
     {
         SaveData data = Read(slot);

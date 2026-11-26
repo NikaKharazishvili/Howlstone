@@ -21,6 +21,7 @@ public class MenuManager : MonoBehaviour
     readonly List<Label>[] items = new List<Label>[ScreenCount];
     SaveSlotList slotList;
     OptionsMenu options;
+    ConfirmBox confirm;
     VisualElement background, loadingFill;
     Label accountName, loadingText;
     MenuScreen current;
@@ -42,6 +43,7 @@ public class MenuManager : MonoBehaviour
         screens[(int)MenuScreen.Slots] = root.Q("Slots");
         slotList = new SaveSlotList(screens[(int)MenuScreen.Slots]);
         options = new OptionsMenu(screens[(int)MenuScreen.Options]);
+        confirm = new ConfirmBox(root.Q("Confirm"));
         GameSettings.UseMusic(musicSource);
         items[(int)MenuScreen.Main] = screens[(int)MenuScreen.Main].Query<Label>(className: "item").ToList();
         items[(int)MenuScreen.Account] = screens[(int)MenuScreen.Account].Query<Label>(className: "key").ToList();
@@ -55,7 +57,9 @@ public class MenuManager : MonoBehaviour
     {
         submitDelay = Mathf.Max(0, submitDelay - Time.deltaTime);
         if (current == MenuScreen.Loading || options.IsWaitingForKey || Time.time < inputBlockedUntil) return;
+        if (confirm.IsOpen) { confirm.ReadAnswer(audioSource, submitSound, cancelSound); return; }
         if (Input.GetButtonDown("Cancel") && current != MenuScreen.Main) { GoBackToMain(); return; }
+        if (ConfirmBox.IsEraseKeyPressed) { AskToErase(); return; }
         MoveByHeldKey();
         bool submitted = current == MenuScreen.Account ? Input.GetButton("Submit") : Input.GetButtonDown("Submit");
         if (submitted && submitDelay == 0) Submit();
@@ -137,6 +141,17 @@ public class MenuManager : MonoBehaviour
     {
         audioSource.PlayOneShot(submitSound);
         options.Submit(() => inputBlockedUntil = Time.time + SubmitDelay);
+    }
+
+    void AskToErase()
+    {
+        switch (current)
+        {
+            case MenuScreen.Options: confirm.Ask("Do you really want to reset to default?", options.ResetShownPage); audioSource.PlayOneShot(submitSound); break;
+            case MenuScreen.Slots: if (!isChoosingNewGameSlot) audioSource.PlayOneShot(slotList.AskToDelete(selected, confirm) ? submitSound : cancelSound); break;
+            case MenuScreen.Main: case MenuScreen.Account: case MenuScreen.Loading: break;
+            default: throw new NotImplementedException(current.ToString());
+        }
     }
 
     void ChooseNewGameSlot()
