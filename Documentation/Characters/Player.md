@@ -9,6 +9,10 @@ The player (the free ninja for now, a humanoid wolf later). One `Player` class s
 ## Movement
 - Moves relative to the camera (`SceneManager.Camera`), turns toward its movement, and keeps its own vertical speed (a `Rigidbody`).
 - Grounded check: `Utils.IsGrounded` (rays from the capsule's feet). Water (`TagWater` trigger) slows the player; a `TagMovingPlatform` makes the player a child of the platform while touching it.
+- **No walls needed to block mountains** (`Player_Actions`): the ground under the level is on the `Ground` layer. Ahead of the player, ground that is higher and steeper than `MaxClimbAngle` stops the movement into it (the player slides along it); standing on such ground (after a jump) the player is not grounded, so cannot jump again, and slides down at `SlideSpeed`. Box and mesh objects block by their own colliders, and their flat tops can be jumped on.
+- **Edge of the world:** with nothing solid below the spot ahead, the player does not move there. A walkable place must have something under it.
+- **Fallen out:** the last spot stood on gentle ground is kept; falling `MaxFallDepth` under it (through the ground by a bug, or off something) puts the player back there. A real drop deeper than that needs the constant raised.
+- A level whose ground is not on the `Ground` layer lets the player climb anything.
 - Sprint costs energy over time and fills it back when not sprinting. After the energy runs out sprint is off until it is full again (`canSprint`).
 
 ## Attacks

@@ -26,6 +26,7 @@ public partial class Player : MonoBehaviour
     void Awake()
     {
         inputActions = KeyBindings.CreateActions();
+        groundMask = LayerMask.GetMask(GroundLayer);
         LoadPlayerStats();
     }
 
@@ -41,11 +42,12 @@ public partial class Player : MonoBehaviour
             Shoot();
         }
         UpdateStates();
+        ReturnIfFallenOut();
     }
 
     void UpdateStates()
     {
-        isGrounded = IsGrounded(capsuleCollider);
+        isGrounded = !isSliding && IsGrounded(capsuleCollider);
         isSprinting = canSprint && isGrounded && moveInput != Vector2.zero && inputActions.Player.Sprint.IsPressed();
         currentSpeed = isTouchingWater ? speed * (isSprinting ? 1f : 0.7f) : isSprinting ? speed * 1.5f : speed; // Faster when sprinting; water slows
 
@@ -169,7 +171,7 @@ public partial class Player : MonoBehaviour
 
         LevelSave levelSave = SaveFile.Current.GetLevel(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
         if (levelSave.hasPosition) transform.position = levelSave.position;
-        respawnPosition = transform.position;
+        respawnPosition = safePosition = transform.position;
     }
 
     public void WriteSave(CharacterSave character, LevelSave levelSave)

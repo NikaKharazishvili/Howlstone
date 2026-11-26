@@ -17,6 +17,7 @@ How a level's world is built: what to make and what to check. Drawing rules: [Re
 - Small plants grow in clumps of one kind, never evenly spread. The path and the places where the player fights stay clear.
 - Buildings face the way the player comes from, with small things around them.
 - Each object is turned and sized a little differently, and stands on the drawn ground.
+- Under and around water the ground is painted dark: through see-through water a bright bed turns it pale.
 - Before scattering a set of variants, look at a picture of all of them: a set can hold dead trunks, stumps or fallen pieces.
 
 ## For the game to work
