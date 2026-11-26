@@ -4,6 +4,7 @@ A third-person follow camera with automatic and hotkey rotation, and an X-ray di
 
 ## Follow and rotate
 - The class is `Cam` (file `Camera.cs`). It sits behind and above the player at `CameraZoom` and `CameraUpPosition`, tilted by `CameraPitch`, and follows every frame.
+- **Order, bug and check:** in `LateUpdate` it turns first and takes its place after, so the player stays in the middle while it turns. Placed first and turned after, the player stood off to the side as long as a rotation key was held. Check: hold a rotation key and watch the player's place on the screen.
 - Rotation hotkeys (`rotateCameraInput`) turn it at `CameraHotkeyRotationSpeed`. With no hotkey, moving sideways turns it slowly toward that side (`CameraAutoRotationSpeed`). A dead player does not rotate the camera.
 - `Cam.Player` is a static field that `SceneManager.Awake` fills.
 

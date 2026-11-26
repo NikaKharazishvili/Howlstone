@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using static Utils;
 using static GameConstants;
 
@@ -15,8 +16,9 @@ public partial class Player : MonoBehaviour
     const float FeetRayStart = 0.5f, FeetRayLength = 1, LookAhead = 0.2f, ProbeHeight = 100;
     const string GroundLayer = "Ground";
     int groundMask;
-    bool isSliding;
+    bool isSliding, isRising;
     Vector3 safePosition;
+    readonly List<Vector3> awayFromWalls = new();
 
     void OnEnable()
     {
@@ -43,7 +45,9 @@ public partial class Player : MonoBehaviour
 
         capsuleCollider.sharedMaterial = isGrounded && !isSliding && moveInput == Vector2.zero ? standingMaterial : movingMaterial;
         Vector3 velocity = isSliding ? Downhill(under.normal) * SlideSpeed : KeepOnWalkableGround(horizontalDirection * currentSpeed);
-        velocity.y = rb.linearVelocity.y;
+        foreach (Vector3 away in awayFromWalls) velocity = StopPushingInto(velocity, away);
+        if (rb.linearVelocity.y <= 0) isRising = false;
+        velocity.y = isRising ? rb.linearVelocity.y : Mathf.Min(rb.linearVelocity.y, 0);
         rb.linearVelocity = velocity;
 
         if (horizontalDirection.x != 0 || horizontalDirection.z != 0) transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(new Vector3(horizontalDirection.x, 0f, horizontalDirection.z)), Time.deltaTime * PlayerRotationSpeed);
@@ -53,14 +57,26 @@ public partial class Player : MonoBehaviour
 
     static Vector3 Downhill(Vector3 groundNormal) => new Vector3(groundNormal.x, 0, groundNormal.z).normalized;
 
+    static Vector3 StopPushingInto(Vector3 velocity, Vector3 awayFromSurface) => velocity - awayFromSurface * Mathf.Min(0, Vector3.Dot(velocity, awayFromSurface));
+
+    void FixedUpdate() => awayFromWalls.Clear();
+
+    void RememberWalls(Collision collision)
+    {
+        for (int i = 0; i < collision.contactCount; i++)
+        {
+            Vector3 normal = collision.GetContact(i).normal;
+            if (normal.y > -0.1f && IsTooSteep(normal)) awayFromWalls.Add(Downhill(normal));
+        }
+    }
+
     Vector3 KeepOnWalkableGround(Vector3 velocity)
     {
         if (velocity == Vector3.zero) return velocity;
         Vector3 above = transform.position + velocity.normalized * (capsuleCollider.radius + LookAhead) + Vector3.up * ProbeHeight;
         if (!Physics.Raycast(above, Vector3.down, ProbeHeight * 2, ~0, QueryTriggerInteraction.Ignore)) return Vector3.zero;
         if (!Physics.Raycast(above, Vector3.down, out RaycastHit ahead, ProbeHeight * 2, groundMask) || !IsTooSteep(ahead.normal) || ahead.point.y <= transform.position.y) return velocity;
-        Vector3 downhill = Downhill(ahead.normal);
-        return velocity - downhill * Mathf.Min(0, Vector3.Dot(velocity, downhill));
+        return StopPushingInto(velocity, Downhill(ahead.normal));
     }
 
     void ReturnIfFallenOut()
@@ -113,6 +129,7 @@ public partial class Player : MonoBehaviour
     void Jump(UnityEngine.InputSystem.InputAction.CallbackContext _)
     {
         if (!IsAlive || !isGrounded) return;
+        isRising = true;
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, PlayerJumpStrength, rb.linearVelocity.z);
         SM.PlaySound(audioSource, SoundType.PlayerJump);
     }

@@ -84,7 +84,12 @@ public partial class Player : MonoBehaviour
     }
 
     void OnCollisionExit(Collision collision) => transform.parent = null;
-    void OnCollisionStay(Collision collision) { if (collision.gameObject.CompareTag(TagMovingPlatform)) transform.SetParent(collision.transform); }
+    void OnCollisionEnter(Collision collision) => RememberWalls(collision);
+    void OnCollisionStay(Collision collision)
+    {
+        RememberWalls(collision);
+        if (collision.gameObject.CompareTag(TagMovingPlatform)) transform.SetParent(collision.transform);
+    }
     void OnTriggerExit(Collider collision) { if (collision.gameObject.CompareTag(TagWater)) isTouchingWater = false; }
     void OnTriggerEnter(Collider collision)
     {

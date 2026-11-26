@@ -26,6 +26,7 @@ How a level's world is built: what to make and what to check. Drawing rules: [Re
 - Ground the player must walk on is gentler than `MaxClimbAngle`, ground that closes the area is steeper.
 - Objects that never move are children of the object `BlobShadows` links as `environment` ([BlobShadows](BlobShadows.md)). Coins, enemies and breakables are children of their counting parents ([SceneManager](Managers/SceneManager.md)).
 - Water has a trigger with the water tag, or it does not slow the player.
+- Things on the water use the material `FloatingPlants` (wind preset Floating of the `Universal` shader), which rides the water's wave. Its flow speed and waves must equal the water material's.
 
 ## Mistakes to avoid (found in the test area)
 The test area is not polished further: its faults are kept here for the real levels.

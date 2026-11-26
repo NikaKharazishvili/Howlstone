@@ -20,10 +20,10 @@ public class Cam : MonoBehaviour
         transform.position = Player.transform.position - transform.forward * CameraZoom + Vector3.up * CameraUpPosition;
     }
 
-    void Update()
+    void LateUpdate()
     {
-        FollowPlayer();
         HandleRotation();
+        FollowPlayer();
         HandleOcclusion();
     }
 
