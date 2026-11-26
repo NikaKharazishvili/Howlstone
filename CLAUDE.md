@@ -37,6 +37,7 @@
 - Prefer fewer objects, components and references: add one only when it removes duplicate code or a startup-order problem.
 - Never run an effect twice for one change. Before calling a method, check what it already does inside. Each effect has one owner method that the others call.
 - One way over many: pick the option that's best overall and use it everywhere, even if another is slightly better in some cases. Balance performance with simplicity.
+- Things of the same kind look and behave the same: before making a new one, find the existing one and reuse its shared style or code.
 - Name a number once (game values in GameConstants) when it's used in more than one place or is a tuning value that may change. Keep one-off obvious numbers inline (0, 1, 0.5f for a half).
 - GameConstants holds only values many scripts use, or game settings kept together. A value used by one script stays in that script.
 - Always prefer shorter, simpler code that is fast to read and easy to understand, with as few lines as possible: collapse short statements onto one line and declare same-type fields and constants together, one per line when they're long. A small plain data class (a few fields, no logic) goes in the file of the one script that owns it: only a MonoBehaviour or ScriptableObject needs its own file.
