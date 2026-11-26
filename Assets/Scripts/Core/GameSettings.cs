@@ -31,6 +31,15 @@ public static class GameSettings
         inBackground = false;
         Application.focusChanged -= ApplyForFocus;
         Application.focusChanged += ApplyForFocus;
+        Application.quitting -= StopAfterPlay;
+        Application.quitting += StopAfterPlay;
+    }
+
+    // Without the domain reload an event stays subscribed after Play and would overwrite what is tuned in the editor
+    static void StopAfterPlay()
+    {
+        Application.focusChanged -= ApplyForFocus;
+        AudioListener.volume = 1;
     }
 
     public static void UseMusic(AudioSource source)
