@@ -15,7 +15,8 @@ The layout and naming rules of the project (the same style as the owner's other 
 ## Names
 - Files and folders: `PascalCase`, no spaces, a number at the end only for real variants (`Footsteps1`). Two names that look alike when spaces, underscores and case are ignored are not allowed.
 - Sounds are named like their `SoundType` value: the game finds them by that name.
-- Moving or renaming an asset keeps its `.meta`, so references hold. Search the code for the path and name first: only `Assets/...` strings in code and in docs break.
+- Every name is clear on its own: when you create, rename or touch an asset, list its folder, fix names that look alike, are vague or break the folder's style, and tell the owner in one line, without being asked.
+- Moving or renaming an asset keeps its `.meta`, so references hold. Search the code and docs for the old path and name first: only `Assets/...` strings there break.
 
 ## Import settings
 - **UI textures** (`Assets/UI`): there is no atlas, so each one is compressed at high quality itself, no mipmaps, Read/Write off. The compressor needs a width and height that are multiples of 4: a texture that is not stays uncompressed, so give a new UI image such a size.

@@ -2,6 +2,7 @@
 paths:
   - "Documentation/**/*.md"
 ---
+- A doc owns one class or system and lists it under `Code:`; rules shared by several classes live in their base class's doc, and an area with 3 or more docs gets its own folder. When a class's comments move to a doc, the doc must exist first.
 - A line about how something is drawn or what it costs (draw calls, batches, SetPass, ms, "instanced", "batched") must come from the code or a measurement, never from another doc: write the measured numbers in the same line, or say "not measured". Coins were documented as one draw call while the code drew each one alone (760 batches at once). When code that a doc describes changes, fix every doc line about it (search the doc folder for the class and for words like "instanc" and "draw call").
 - A doc never repeats a tuning value (a cooldown, damage, a duration, a count, a distance): it names the constant and says what it does. The owner tunes numbers in the code without touching the docs, so a copied value goes stale. A number stays in a doc only when it is a measurement, or a fixed fact the code cannot show (a file size, a pixel size of an asset).
 - A doc never lists unused or leftover files, and never names a file that was tried and deleted: the owner imports and removes files while testing, and such a line only goes stale. Write what was tried and why it was dropped, without file names.

@@ -3,6 +3,7 @@
 Plays animation clips on any object with an `Animator`, with no Animator Controller: a `PlayableGraph` with one mixer. Used by the Player, the four skeleton types, the skeleton decorations, and the rotating Coin and Key. The menu and the HUD are UI Toolkit ([UI](../UI.md)). Taken from the owner's other project, with only what this game needs (crossfades, the progress bar); no head turn, no baked animation, no attack timing.
 
 ## How it works
+- **Rule:** every animation is played by `ClipAnimator`, never by an Animator Controller.
 - The `Animator` component stays (the graph writes into it) but has no controller. Its culling mode is set in the prefab: characters use `CullUpdateTransforms` (off-screen characters stop moving bones, while code and animation events keep running).
 - The game logic decides which clip plays. `Play(clip, speed, crossfade)`: the new clip fades in while the others fade out, so a `Play` in the middle of a fade never jumps. The others share what is left of the weight. A clip that faded out is removed from the mixer.
 - A looping clip that is still fading out and is asked again fades back in from where it is, so calling `Play` with the same looping clip every frame is cheap and safe.

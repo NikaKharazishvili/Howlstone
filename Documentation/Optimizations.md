@@ -1,6 +1,6 @@
 # Optimizations
 
-Before testing an idea, read "Not used" and "Tried and removed". A number belongs here only when it was measured: write the scene and what was measured.
+Before testing an idea, read "Not used" and "Tried and removed": never repeat a failed one, and write each new try here. A number belongs here only when it was measured: write the scene and what was measured.
 
 ## Used
 - UI images are plain textures (no Sprite Atlas): UI Toolkit batches them itself. Measured in the editor, Level1, game view, player standing: 23 batches and 17 SetPass calls with two Sprite Atlases and the same with both deleted; hiding the whole HUD gives 22 and 16, so the whole HUD (icons, bars, texts) costs 1 batch.

@@ -44,7 +44,7 @@ Not done yet. The aim is a small, really good, playable game ([AboutTheGame](Abo
 - Camera shake for hit feedback: `ShakeCamera`.
 
 ## Code and docs (while each script is touched)
-- [ ] Move the comments of a script into its doc and delete them from the script (every script listed under `Code:` in a doc); apply the code rules in CLAUDE.md to it.
+- [ ] Move the comments of a script into its doc and delete them from the script (every script listed under `Code:` in a doc); apply the code rules in `.claude/rules/scripts.md` to it.
 - [ ] Move the hit moment of an attack from the `DealDamage` animation event to a number in the data ([ClipAnimator](Characters/ClipAnimator.md)).
 - [ ] The static `SM`, `Player` and `Cam` fields filled by `SceneManager.Awake`: replace with serialized references, and clear any static state at the start of Play.
 - [x] Sounds: normal references in the `SceneManager` prefab instead of an Addressables load on every play ([SceneManager](Managers/SceneManager.md)).

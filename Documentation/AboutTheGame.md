@@ -36,7 +36,7 @@
 - **The player may become a humanoid creature** (from the owner's bought assets) instead of the free Mixamo ninja, which also removes the Mixamo licence question. Humanoid, so the humanoid animation clips are reused; the other creatures of a pack can be enemies or bosses, different in each level. The game name may change with it (open).
 - **Packs stay for now** (KayKit, trees, skies, the Mixamo ninja): used while building, then deleted, replaced or kept one by one, as the owner decides.
 - **Private editor toolkit** (`Assets/Scripts/Nikson`, `Documentation/Nikson`): installed in the project, never committed, never used by game code, never described in public files.
-- Code follows the clean-code rules in `CLAUDE.md`.
+- Code follows the clean-code rules in `.claude/rules/scripts.md`.
 
 ## Decided: the player's abilities
 - **A thrown projectile stays:** it is also used to solve puzzles (shoot something to open something). Idea, not decided: the wolf throws rocks and stones, maybe collecting them first.
