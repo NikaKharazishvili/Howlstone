@@ -31,6 +31,8 @@ Not done yet. The aim is a small, really good, playable game ([AboutTheGame](Abo
 - [ ] Localization: string tables from the first text we rebuild, English then Russian.
 - [ ] A death screen.
 
+- [ ] A cave and overhang maker for our ground: a 3D grid only around the dug spots, brushes that add and remove balls in it, a mesh built from the grid (marching cubes) with the ground's textures, and a hole in the ground where it opens. Digger works this way but only on Unity's Terrain: use the idea, never its code.
+
 ## Finished in the owner's other project (port, then review)
 - Breakables and chests with the break effect: `Breakable`, `Chest`.
 - Drops from enemies, chests and breakables: `SceneManager_Loot`.

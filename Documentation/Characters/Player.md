@@ -16,8 +16,6 @@ The player (the free ninja for now, a humanoid wolf later). One `Player` class s
 - A level whose ground is not on the `Ground` layer lets the player climb anything.
 - **Standing still:** the collider has no friction while moving (or it would stick to walls), so on any slope the body crept downhill with no input. Standing on gentle ground it gets `standingMaterial` (full friction), anything else the material the collider starts with. Check: stand on a slope and watch the position.
 - Sprint costs energy over time and fills it back when not sprinting. After the energy runs out sprint is off until it is full again (`canSprint`).
-- Sprint starts only on the ground and is kept in the air while the key and the move stay pressed. Bug and check: it ended at take-off, so a sprint jump went no farther than a walking one (8.9 m against 9.5 m measured in the editor); a sprint jump on flat ground must go about half as far again.
-
 ## Attacks
 - **Spin:** has a cooldown (`spinReady`), blocks throwing, lasts `spinTime`. While spinning an enemy that touches the player dies (the check is in [Enemy](Enemy.md)), and an enemy spell does no damage.
 - **Shuriken:** has a cooldown (`throwReady`). It finds the nearest enemy inside `ShurikenDetectionRadius` and `ShurikenDetectionAngle` in front, and throws a pooled `ShurikenProjectile` at it, or straight ahead with no target.
