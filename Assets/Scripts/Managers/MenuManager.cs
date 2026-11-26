@@ -10,7 +10,7 @@ public class MenuManager : MonoBehaviour
     enum MenuScreen { Main, Account, Options, Loading, LoadSlots, NewGameSlots }
     const string HiddenClass = "hidden", SelectedClass = "selected", DimClass = "dim";
     const int MaxAccountNameLength = 16;
-    const float SubmitDelay = 0.2f, FirstRepeatDelay = 0.4f, RepeatDelay = 0.12f;
+    const float SubmitDelay = 0.2f;
     const int KeyColumns = 7, DeleteKeyIndex = 26, SaveKeyIndex = 27, NewGameIndex = 0, LoadSavedIndex = 1, OptionsIndex = 2, ExitIndex = 3;
 
     [SerializeField] AudioClip selectionSound, submitSound, cancelSound, keyboardSound;
@@ -19,14 +19,15 @@ public class MenuManager : MonoBehaviour
     static readonly int ScreenCount = Enum.GetValues(typeof(MenuScreen)).Length;
     readonly VisualElement[] screens = new VisualElement[ScreenCount];
     readonly List<Label>[] items = new List<Label>[ScreenCount];
+    readonly MenuKeys menuKeys = new();
     SaveSlotList loadList, newGameList;
     OptionsMenu options;
     ConfirmBox confirm;
     VisualElement background, loadingFill;
     Label accountName, loadingText;
     MenuScreen current;
-    int chosenSlot, selected, heldStep, lastLoadingPercent = -1;
-    float submitDelay, repeatTimer, inputBlockedUntil;
+    int chosenSlot, selected, lastLoadingPercent = -1;
+    float submitDelay;
 
     void Start()
     {
@@ -58,42 +59,24 @@ public class MenuManager : MonoBehaviour
     void Update()
     {
         submitDelay = Mathf.Max(0, submitDelay - Time.deltaTime);
-        if (current == MenuScreen.Loading || options.IsWaitingForKey || Time.time < inputBlockedUntil) return;
+        if (current == MenuScreen.Loading || options.IsBlockingInput) return;
         if (confirm.IsOpen) { confirm.ReadAnswer(audioSource, submitSound, cancelSound); return; }
         if (Input.GetButtonDown("Cancel") && current != MenuScreen.Main) { GoBackToMain(); return; }
         if (ConfirmBox.IsEraseKeyPressed) { AskToErase(); return; }
-        MoveByHeldKey();
+        int step = menuKeys.Repeat(ReadStep());
+        if (step != 0) Move(step);
         bool submitted = current == MenuScreen.Account ? Input.GetButton("Submit") : Input.GetButtonDown("Submit");
         if (submitted && submitDelay == 0) Submit();
     }
 
-    void MoveByHeldKey()
-    {
-        int step = ReadStep();
-        if (step == 0) { heldStep = 0; return; }
-        if (step == heldStep)
-        {
-            repeatTimer -= Time.deltaTime;
-            if (repeatTimer > 0) return;
-            repeatTimer = RepeatDelay;
-        }
-        else
-        {
-            heldStep = step;
-            repeatTimer = FirstRepeatDelay;
-        }
-        Move(step);
-    }
-
     int ReadStep()
     {
-        float horizontal = Input.GetAxisRaw("Horizontal"), vertical = Input.GetAxisRaw("Vertical");
-        int horizontalStep = horizontal > 0 ? 1 : horizontal < 0 ? -1 : 0, verticalStep = vertical > 0 ? -1 : vertical < 0 ? 1 : 0;
+        int horizontal = MenuKeys.Horizontal, vertical = MenuKeys.Vertical;
         switch (current)
         {
-            case MenuScreen.Main: case MenuScreen.LoadSlots: case MenuScreen.NewGameSlots: return verticalStep;
-            case MenuScreen.Account: return horizontalStep != 0 ? horizontalStep : verticalStep * KeyColumns;
-            case MenuScreen.Options: return horizontalStep != 0 ? horizontalStep : verticalStep * OptionsMenu.VerticalStep;
+            case MenuScreen.Main: case MenuScreen.LoadSlots: case MenuScreen.NewGameSlots: return vertical;
+            case MenuScreen.Account: return horizontal != 0 ? horizontal : vertical * KeyColumns;
+            case MenuScreen.Options: return OptionsMenu.StepFor(horizontal, vertical);
             case MenuScreen.Loading: return 0;
             default: throw new NotImplementedException(current.ToString());
         }
@@ -121,7 +104,7 @@ public class MenuManager : MonoBehaviour
             case MenuScreen.Account: SubmitKey(); break;
             case MenuScreen.LoadSlots: LoadSelectedSlot(); break;
             case MenuScreen.NewGameSlots: ChooseNewGameSlot(); break;
-            case MenuScreen.Options: SubmitOption(); break;
+            case MenuScreen.Options: audioSource.PlayOneShot(submitSound); options.Submit(); break;
             case MenuScreen.Loading: break;
             default: throw new NotImplementedException(current.ToString());
         }
@@ -139,18 +122,11 @@ public class MenuManager : MonoBehaviour
         }
     }
 
-    // The key that ends the waiting must not also move, submit or go back in the menu
-    void SubmitOption()
-    {
-        audioSource.PlayOneShot(submitSound);
-        options.Submit(() => inputBlockedUntil = Time.time + SubmitDelay);
-    }
-
     void AskToErase()
     {
         switch (current)
         {
-            case MenuScreen.Options: confirm.Ask("Do you really want to reset to default?", options.ResetShownPage); audioSource.PlayOneShot(submitSound); break;
+            case MenuScreen.Options: options.AskToReset(confirm); audioSource.PlayOneShot(submitSound); break;
             case MenuScreen.LoadSlots: audioSource.PlayOneShot(loadList.AskToDelete(selected, confirm) ? submitSound : cancelSound); break;
             case MenuScreen.Main: case MenuScreen.Account: case MenuScreen.Loading: case MenuScreen.NewGameSlots: break;
             default: throw new NotImplementedException(current.ToString());
@@ -221,7 +197,7 @@ public class MenuManager : MonoBehaviour
         current = next;
         selected = 0;
         submitDelay = SubmitDelay;
-        heldStep = 0;
+        menuKeys.Release();
         if (next == MenuScreen.Options) options.Open();
         if (items[(int)next].Count > 0) items[(int)next][0].AddToClassList(SelectedClass);
     }

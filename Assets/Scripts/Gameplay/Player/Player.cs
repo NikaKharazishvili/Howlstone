@@ -29,6 +29,8 @@ public partial class Player : MonoBehaviour
         LoadPlayerStats();
     }
 
+    public void ApplyKeyBindings() => KeyBindings.Apply(inputActions);
+
     void Update()
     {
         if (IsAlive)

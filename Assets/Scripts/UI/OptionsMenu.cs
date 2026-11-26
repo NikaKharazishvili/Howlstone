@@ -1,14 +1,16 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 public class OptionsMenu
 {
     // A move step of this size is up or down, a step of 1 is left or right
-    public const int VerticalStep = 2;
+    const int VerticalStep = 2;
 
     const string SelectedClass = "selected", PageBeforeClass = "page-before", PageAfterClass = "page-after", OffClass = "off";
     const int SettingsPage = 0, KeysPage = 1, CellsPerRow = 2;
+    const float InputBlockDelay = 0.2f;
 
     readonly KeyBindingList keys;
     readonly Setting[] settings = (Setting[])Enum.GetValues(typeof(Setting));
@@ -18,8 +20,11 @@ public class OptionsMenu
     readonly VisualElement pageLeft, pageRight;
     readonly Label pageNumber;
     int page, selected;
+    float blockedUntil;
 
-    public bool IsWaitingForKey => keys.IsWaitingForKey;
+    public bool IsBlockingInput => keys.IsWaitingForKey || Time.unscaledTime < blockedUntil;
+
+    public static int StepFor(int horizontal, int vertical) => horizontal != 0 ? horizontal : vertical * VerticalStep;
 
     List<VisualElement> Items => pageItems[page];
     int PagerItem => Items.Count - 1;
@@ -51,13 +56,17 @@ public class OptionsMenu
         else Select((selected + step + keys.Cells.Count) % keys.Cells.Count);
     }
 
-    public void Submit(Action finished)
+    public void Submit()
     {
         if (selected == PagerItem) SwitchPage(page == SettingsPage ? KeysPage : SettingsPage);
-        else if (page == KeysPage) { keys.WaitForNewKey(selected, finished); return; }
+        else if (page == KeysPage) { keys.WaitForNewKey(selected, BlockInputShortly); return; }
         else if (settings[selected] == Setting.MuteInBackground) ChangeSelectedSetting(1);
-        finished();
+        BlockInputShortly();
     }
+
+    public void AskToReset(ConfirmBox confirm) => confirm.Ask("Do you really want to reset to default?", ResetShownPage);
+
+    void BlockInputShortly() => blockedUntil = Time.unscaledTime + InputBlockDelay;
 
     int NextRow(int direction)
     {
@@ -123,7 +132,7 @@ public class OptionsMenu
         valueLabels[selected].text = GameSettings.ValueText(settings[selected]);
     }
 
-    public void ResetShownPage()
+    void ResetShownPage()
     {
         if (page == KeysPage) { keys.ResetToDefault(); return; }
         GameSettings.ResetToDefault();

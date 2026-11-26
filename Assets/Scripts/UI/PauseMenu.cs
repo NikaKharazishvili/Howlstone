@@ -7,20 +7,24 @@ using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 
 public class PauseMenu : MonoBehaviour
 {
+    enum PauseScreen { Main, Slots, Options }
     const string HiddenClass = "hidden", SelectedClass = "selected", MenuScene = "Menu";
-    const int ResumeIndex = 0, LoadIndex = 1, MainMenuIndex = 2, ExitIndex = 3;
+    const int ResumeIndex = 0, LoadIndex = 1, OptionsIndex = 2, MainMenuIndex = 3, ExitIndex = 4;
 
     [SerializeField] UIDocument document;
     [SerializeField] AudioSource audioSource;
     [SerializeField] AudioClip selectionSound, submitSound, cancelSound;
-    VisualElement pause, slots;
+    readonly MenuKeys menuKeys = new();
+    VisualElement pause, slots, optionsScreen;
     SaveSlotList slotList;
+    OptionsMenu options;
     ConfirmBox confirm;
     List<Label> pauseItems;
-    bool isPaused, isShowingSlots;
-    int selected, heldStep;
+    PauseScreen shown;
+    bool isPaused;
+    int selected;
 
-    List<Label> CurrentItems => isShowingSlots ? slotList.Slots : pauseItems;
+    List<Label> CurrentItems => shown == PauseScreen.Slots ? slotList.Slots : pauseItems;
 
     void Start()
     {
@@ -28,7 +32,9 @@ public class PauseMenu : MonoBehaviour
         audioSource.ignoreListenerPause = true;
         pause = root.Q("Pause");
         slots = root.Q("Slots");
+        optionsScreen = root.Q("Options");
         slotList = new SaveSlotList(slots);
+        options = new OptionsMenu(optionsScreen);
         confirm = new ConfirmBox(root.Q("Confirm"));
         pauseItems = pause.Query<Label>(className: "item").ToList();
         pauseItems[0].AddToClassList(SelectedClass);
@@ -36,24 +42,22 @@ public class PauseMenu : MonoBehaviour
 
     void Update()
     {
+        if (options.IsBlockingInput) return;
         if (confirm.IsOpen) { confirm.ReadAnswer(audioSource, submitSound, cancelSound); return; }
-        if (Input.GetButtonDown("Cancel")) { if (isShowingSlots) ShowSlots(false); else SetPaused(!isPaused); return; }
+        if (Input.GetButtonDown("Cancel")) { if (shown == PauseScreen.Main) SetPaused(!isPaused); else GoBackToPause(); return; }
         if (!isPaused) return;
-        if (isShowingSlots && ConfirmBox.IsEraseKeyPressed) { audioSource.PlayOneShot(slotList.AskToDelete(selected, confirm) ? submitSound : cancelSound); return; }
+        if (ConfirmBox.IsEraseKeyPressed) { AskToErase(); return; }
         MoveSelection();
         if (Input.GetButtonDown("Submit")) Submit();
     }
 
     void MoveSelection()
     {
-        float vertical = Input.GetAxisRaw("Vertical");
-        int step = vertical > 0 ? -1 : vertical < 0 ? 1 : 0;
-        if (step != 0 && step != heldStep)
-        {
-            Select((selected + step + CurrentItems.Count) % CurrentItems.Count);
-            audioSource.PlayOneShot(selectionSound);
-        }
-        heldStep = step;
+        int step = menuKeys.Repeat(shown == PauseScreen.Options ? OptionsMenu.StepFor(MenuKeys.Horizontal, MenuKeys.Vertical) : MenuKeys.Vertical);
+        if (step == 0) return;
+        if (shown == PauseScreen.Options) options.Move(step);
+        else Select((selected + step + CurrentItems.Count) % CurrentItems.Count);
+        audioSource.PlayOneShot(selectionSound);
     }
 
     void Select(int index)
@@ -79,27 +83,62 @@ public class PauseMenu : MonoBehaviour
         SceneManager.Instance.Player.enabled = !frozen;
     }
 
-    void ShowSlots(bool shown)
+    void GoBackToPause()
     {
-        if (shown) slotList.ShowForLoad();
-        CurrentItems[selected].RemoveFromClassList(SelectedClass);
-        isShowingSlots = shown;
+        audioSource.PlayOneShot(cancelSound);
+        ShowScreen(PauseScreen.Main);
+    }
+
+    void ShowScreen(PauseScreen next)
+    {
+        if (shown == PauseScreen.Options)
+        {
+            options.Close();
+            SceneManager.Instance.Player.ApplyKeyBindings();
+        }
+        else CurrentItems[selected].RemoveFromClassList(SelectedClass);
+        shown = next;
         selected = 0;
-        CurrentItems[selected].AddToClassList(SelectedClass);
-        slots.EnableInClassList(HiddenClass, !shown);
-        pause.EnableInClassList(HiddenClass, shown);
+        menuKeys.Release();
+        if (next == PauseScreen.Options) options.Open();
+        else CurrentItems[selected].AddToClassList(SelectedClass);
+        pause.EnableInClassList(HiddenClass, next != PauseScreen.Main);
+        slots.EnableInClassList(HiddenClass, next != PauseScreen.Slots);
+        optionsScreen.EnableInClassList(HiddenClass, next != PauseScreen.Options);
     }
 
     void Submit()
     {
-        if (isShowingSlots) { LoadSelectedSlot(); return; }
+        switch (shown)
+        {
+            case PauseScreen.Main: SubmitPauseItem(); break;
+            case PauseScreen.Slots: LoadSelectedSlot(); break;
+            case PauseScreen.Options: audioSource.PlayOneShot(submitSound); options.Submit(); break;
+            default: throw new NotImplementedException(shown.ToString());
+        }
+    }
+
+    void SubmitPauseItem()
+    {
         switch (selected)
         {
             case ResumeIndex: SetPaused(false); break;
-            case LoadIndex: audioSource.PlayOneShot(submitSound); ShowSlots(true); break;
+            case LoadIndex: audioSource.PlayOneShot(submitSound); slotList.ShowForLoad(); ShowScreen(PauseScreen.Slots); break;
+            case OptionsIndex: audioSource.PlayOneShot(submitSound); ShowScreen(PauseScreen.Options); break;
             case MainMenuIndex: SetFrozen(false); UnitySceneManager.LoadScene(MenuScene); break;
             case ExitIndex: QuitGame(); break;
             default: throw new NotImplementedException(selected.ToString());
+        }
+    }
+
+    void AskToErase()
+    {
+        switch (shown)
+        {
+            case PauseScreen.Options: options.AskToReset(confirm); audioSource.PlayOneShot(submitSound); break;
+            case PauseScreen.Slots: audioSource.PlayOneShot(slotList.AskToDelete(selected, confirm) ? submitSound : cancelSound); break;
+            case PauseScreen.Main: break;
+            default: throw new NotImplementedException(shown.ToString());
         }
     }
 

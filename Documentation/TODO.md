@@ -27,7 +27,7 @@ Not done yet. The aim is a small, really good, playable game ([AboutTheGame](Abo
 - [ ] Automatic upgrades: a table of what each level up gives, and the pause menu page that shows it.
 - [ ] Rewards: drops from enemies, chests and breakables.
 - [ ] Level 2, with its own enemies and challenges.
-- [ ] The pause menu has Resume, Load, Main Menu and Exit ([UI](UI.md)). The menu's Options has volumes, mute in background, contrast, saturation and the key bindings ([Options](Options.md)). Still to build: Options in the pause menu, graphics (resolution, quality), language. Settings are saved outside `Assets` like the saves.
+- [ ] The pause menu has Resume, Load, Options, Main Menu and Exit ([UI](UI.md)). Options has volumes, mute in background, contrast, saturation and the key bindings ([Options](Options.md)). Still to build: graphics (resolution, quality), language. Settings are saved outside `Assets` like the saves.
 - [ ] Localization: string tables from the first text we rebuild, English then Russian.
 - [ ] A death screen.
 

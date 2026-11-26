@@ -1,6 +1,6 @@
 # Options
 
-The menu's Options screen: two pages, settings and key bindings (`OptionsMenu` moves between them).
+The Options screen of the main menu and of the pause menu: two pages, settings and key bindings (`OptionsMenu` moves between them). Both documents place the same template, `Options.uxml` (its styles in `Options.uss`), and each has its own `OptionsMenu`.
 
 ## Moving in the screen
 - Below both pages is the pager (`1 / 2`). Left and Right on the pager change the page, as does Submit. The pages slide sideways inside a box that hides what is outside it.
@@ -8,7 +8,7 @@ The menu's Options screen: two pages, settings and key bindings (`OptionsMenu` m
 - Reset to default is not an entry: it is a key of its own, shown in the line of keys at the bottom. It asks first (`ConfirmBox`, [UI](UI.md)), then resets what the shown page holds.
 - Both pages are tables of the same look. Settings page: Up and Down select, Left and Right change the value, Submit switches an On/Off setting.
 - Keys page: Up, Down, Left and Right select a cell.
-- `OptionsMenu` gets one step from `MenuManager`: size `VerticalStep` is up or down, size 1 is left or right.
+- `OptionsMenu` gets one step from its owner, made with `StepFor`: size `VerticalStep` is up or down, size 1 is left or right. While `IsBlockingInput` the owner reads nothing.
 
 ## Settings
 - Music volume, effects volume, mute in background, contrast, saturation. `GameSettings` owns them: it applies and writes them on every change.
@@ -25,16 +25,16 @@ The menu's Options screen: two pages, settings and key bindings (`OptionsMenu` m
 - A table of actions with a keyboard cell and a gamepad cell (`KeyBindingList` builds the rows from the input actions). Submit starts waiting for a new key (the cell shows `...`), Escape cancels. Resetting the keys page puts every key back to the default.
 - A new action the player can rebind gets one `AddRow` line. For a composite (move, camera) the row names the part. A row changes the first binding of its device, so the arrow keys and the left stick always move as well.
 - Only a key of the cell's device is accepted (never the mouse). A key two rows share is allowed and both cells turn red.
-- While waiting, and for a short time after, the menu ignores input, so the key that was pressed does not also move or go back.
+- While waiting, and for a short time after, the menu ignores input (`IsBlockingInput`), so the key that was pressed does not also move or go back. The delay counts real time: a paused game has no game time.
 - The face buttons show as icons (`pad-cross`, `pad-circle`, `pad-square`, `pad-triangle`), other gamepad controls as a short name (`PadNames`).
 
 ## Saving the keys
 - `KeyBindings` owns the file `KeyBindings.json` beside the project (in `.gitignore`): the binding overrides of the Input System.
 - Every script that needs the game's actions makes them with `KeyBindings.CreateActions`, never `new PlayerInputActions()`, so the player's keys are used. A missing or unreadable file means the default keys.
+- Actions made before a change keep the old keys until `KeyBindings.Apply`: the pause menu calls `Player.ApplyKeyBindings` when the Options screen closes. A new script that keeps its own actions in the level must be called there too.
 
 ## Not done
 - The menus themselves read the old Input Manager: their keys cannot be changed, and its Submit and Cancel are gamepad buttons 0 and 1, which may not be Cross and Circle on every pad (not tested with a pad).
-- The Level1 pause menu has no Options entry.
 - Level1 has no music.
 
 **Code:**
