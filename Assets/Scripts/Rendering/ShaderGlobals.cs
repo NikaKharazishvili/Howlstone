@@ -21,8 +21,7 @@ public class ShaderGlobals
     [SerializeField, Range(-100, 100)] float contrast = DefaultContrast, saturation = DefaultSaturation;
     [SerializeField] Color sunColor = Color.white;
     [SerializeField, Range(-100, 100)] float warmth;
-    [SerializeField, Range(0, 1)] float environmentToonAmount = 0.8f;
-    [SerializeField, Range(0, 1)] float characterToonAmount = 1;
+    [SerializeField, Range(0, 1)] float toonAmount = 0.6f;
     [SerializeField] float toonDimming = 0.6f;
     [SerializeField, Range(0, 2)] float toonBandingBias = 2;
     [SerializeField, Range(0.1f, 1)] float toonRimOffset = 0.3f;
