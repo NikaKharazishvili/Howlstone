@@ -31,6 +31,16 @@ Not done yet. The aim is a small, really good, playable game ([AboutTheGame](Abo
 - [ ] Localization: string tables from the first text we rebuild, English then Russian.
 - [ ] A death screen.
 
+## Finished in the owner's other project (port, then review)
+- Breakables and chests with the break effect: `Breakable`, `Chest`.
+- Drops from enemies, chests and breakables: `SceneManager_Loot`.
+- Torches and fires: `PointLight` (its shader side is already here).
+- Day and night: `SceneManager_DayNight`.
+- Low health and hurt screen effects: `ScreenEffects.shader`, `SceneManager_ScreenEffects`.
+- Enemy health bars, damage numbers, coins drawn with no objects: `WorldUI`.
+- Minimap: `SceneManager_Minimap`, `MinimapDots`.
+- Camera shake for hit feedback: `ShakeCamera`.
+
 ## Code and docs (while each script is touched)
 - [ ] Move the comments of a script into its doc and delete them from the script (every script listed under `Code:` in a doc); apply the code rules in CLAUDE.md to it.
 - [ ] Move the hit moment of an attack from the `DealDamage` animation event to a number in the data ([ClipAnimator](Characters/ClipAnimator.md)).
@@ -39,7 +49,7 @@ Not done yet. The aim is a small, really good, playable game ([AboutTheGame](Abo
 - [ ] Rename `AggroTrigger .cs` (a space in the file name) .
 - [ ] Player and enemy numbers (health, energy, cooldowns, speeds) into data or constants ([Player](Characters/Player.md)).
 - [ ] `MenuManager` is built (screens as an enum, one selectable list) ([MenuManager](Managers/MenuManager.md)).
-- [ ] Non-allocating camera cast and cached trigger components ([Optimizations](Optimizations.md)).
+- [ ] Cached trigger components ([Optimizations](Optimizations.md)).
 - [ ] The door has an open clip and the player has a `hasKey` flag, but nothing connects them: use them or delete them.
 - [ ] Go through the packs one by one and delete, replace or keep them (the owner decides each) ([ThirdPartyAssets](ThirdPartyAssets.md)).
 
