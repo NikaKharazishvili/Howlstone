@@ -6,7 +6,7 @@ The Options screen of the main menu and of the pause menu: two pages, settings a
 - Below both pages is the pager (`1 / 2`). Left and Right on the pager change the page, as does Submit. The pages slide sideways inside a box that hides what is outside it.
 - Opening the screen shows the page as it was left and selects its first table entry. Up and Down go round: table rows, pager.
 - Reset to default is not an entry: it is a key of its own, shown in the line of keys at the bottom. It asks first (`ConfirmBox`, [UI](UI.md)), then resets what the shown page holds.
-- Both pages are tables of the same look. Settings page: Up and Down select, Left and Right change the value, Submit switches an On/Off setting.
+- Both pages are tables of the same look. Settings page: Up and Down select, Left and Right change the value, Submit switches an On/Off setting. The line of keys shows Change (Submit) only on the keys page (`ChangeHint`): a setting is changed with the arrows.
 - Keys page: Up, Down, Left and Right select a cell.
 - `OptionsMenu` gets one step from its owner, made with `StepFor`: size `VerticalStep` is up or down, size 1 is left or right. While `IsBlockingInput` the owner reads nothing.
 

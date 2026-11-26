@@ -9,7 +9,7 @@ public class PauseMenu : MonoBehaviour
 {
     enum PauseScreen { Main, Slots, Options }
     const string HiddenClass = "hidden", SelectedClass = "selected", MenuScene = "Menu";
-    const int ResumeIndex = 0, LoadIndex = 1, OptionsIndex = 2, MainMenuIndex = 3, ExitIndex = 4;
+    const int MainMenuIndex = 0, LoadIndex = 1, OptionsIndex = 2, ExitIndex = 3;
 
     [SerializeField] UIDocument document;
     [SerializeField] AudioSource audioSource;
@@ -122,10 +122,9 @@ public class PauseMenu : MonoBehaviour
     {
         switch (selected)
         {
-            case ResumeIndex: SetPaused(false); break;
+            case MainMenuIndex: SetFrozen(false); UnitySceneManager.LoadScene(MenuScene); break;
             case LoadIndex: audioSource.PlayOneShot(submitSound); slotList.ShowForLoad(); ShowScreen(PauseScreen.Slots); break;
             case OptionsIndex: audioSource.PlayOneShot(submitSound); ShowScreen(PauseScreen.Options); break;
-            case MainMenuIndex: SetFrozen(false); UnitySceneManager.LoadScene(MenuScene); break;
             case ExitIndex: QuitGame(); break;
             default: throw new NotImplementedException(selected.ToString());
         }

@@ -17,7 +17,7 @@ public class OptionsMenu
     readonly List<Label> valueLabels = new();
     readonly VisualElement[] pages;
     readonly List<VisualElement>[] pageItems = { new(), new() };
-    readonly VisualElement pageLeft, pageRight;
+    readonly VisualElement pageLeft, pageRight, changeHint;
     readonly Label pageNumber;
     int page, selected;
     float blockedUntil;
@@ -35,6 +35,7 @@ public class OptionsMenu
         pages = new[] { root.Q("SettingsPage"), root.Q("KeysPage") };
         pageLeft = root.Q("PageLeft");
         pageRight = root.Q("PageRight");
+        changeHint = root.Q("ChangeHint");
         pageNumber = root.Q<Label>("PageNumber");
         AddSettingRows(root.Q("Settings"));
         VisualElement pager = root.Q("Pager");
@@ -102,6 +103,7 @@ public class OptionsMenu
         }
         pageLeft.EnableInClassList(OffClass, page == 0);
         pageRight.EnableInClassList(OffClass, page == pages.Length - 1);
+        changeHint.EnableInClassList(OffClass, page == SettingsPage);
         pageNumber.text = $"{page + 1} / {pages.Length}";
     }
 
